@@ -24,7 +24,7 @@ You want a URL like `https://healerboys.netlify.app/` that works from ANY device
    git add .
    git commit -m "Coffee shop website"
    git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/coffee-shop.git
+   git remote add origin https://github.com/Sadman-Devx /coffee-shop.git
    git push -u origin main
    ```
    
