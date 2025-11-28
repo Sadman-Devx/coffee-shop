@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order Confirmation · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="confirmation-section">
+    <div class="confirmation-card">
+        <div class="confirmation-icon">✓</div>
+        <h1>Order Confirmed!</h1>
+        <p class="confirmation-message">Thank you for your order, {{ order.customer_name }}!</p>
+        
+        <div class="order-details">
+            <h2>Order Details</h2>
+            <div class="detail-row">
+                <span>Order Number:</span>
+                <strong>#{{ order.id }}</strong>
+            </div>
+            <div class="detail-row">
+                <span>Status:</span>
+                <span class="status-badge">{{ order.get_status_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Total Amount:</span>
+                <strong>${{ order.total_amount|floatformat:2 }}</strong>
+            </div>
+            <div class="detail-row">
+                <span>Order Date:</span>
+                <span>{{ order.created_at|date:"F d, Y g:i A" }}</span>
+            </div>
+        </div>
+
+        <div class="order-items-summary">
+            <h3>Items Ordered:</h3>
+            <ul>
+                {% for item in order.items.all %}
+                <li>
+                    <span>{{ item.quantity }}x {{ item.coffee.name }}</span>
+                    <span>${{ item.subtotal|floatformat:2 }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="confirmation-actions">
+            <p class="confirmation-note">We'll contact you at {{ order.customer_email }} or {{ order.customer_phone }} to confirm your order.</p>
+            <a href="{% url 'home' %}" class="cta-btn primary">Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Brew Bloom Coffee · Crafted Cups{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <p class="kicker">Neighborhood Coffee Atelier</p>
+    <h1>Slow-crafted coffee, intentionally served.</h1>
+    <p class="subhead">
+        Sustainably sourced beans roasted in micro-batches, a menu that evolves with the seasons,
+        and a space designed for genuine connection.
+    </p>
+    <div class="hero-actions">
+        <a href="#menu" class="cta-btn primary">Explore the menu</a>
+        <a href="#visit" class="cta-btn ghost">Plan a visit</a>
+    </div>
+</section>
+
+<section id="highlights" class="highlight-grid">
+    <article class="highlight-card">
+        <h3>{{ highlights.tagline }}</h3>
+        <p>{{ highlights.hours }}</p>
+    </article>
+    <article class="highlight-card">
+        <h3>Find us</h3>
+        <p>{{ highlights.address }}</p>
+    </article>
+    <article class="highlight-card">
+        <h3>Call ahead</h3>
+        <p>{{ highlights.phone }}</p>
+    </article>
+</section>
+
+<section id="menu" class="menu-section">
+    <div class="section-heading">
+        <p class="kicker">Signature pours</p>
+        <h2>Modern classics & seasonal innovations</h2>
+        <p>Each recipe is dialed in daily to highlight the terroir of the bean and the craft of our baristas.</p>
+    </div>
+    <div class="menu-grid">
+        {% for coffee in coffees %}
+        <article class="menu-card">
+            <div class="menu-card-image">
+                {% if coffee.image %}
+                <img src="{{ coffee.image }}" alt="{{ coffee.name }}" loading="lazy">
+                {% else %}
+                <div class="menu-image-placeholder">☕</div>
+                {% endif %}
+            </div>
+            <div class="menu-card-content">
+                <p class="menu-origin">{{ coffee.origin }}</p>
+                <h3>{{ coffee.name }}</h3>
+                <p class="menu-notes">{{ coffee.notes }}</p>
+                <div class="menu-meta">
+                    <span class="menu-strength">{{ coffee.strength }}</span>
+                    <span class="menu-price">${{ coffee.price|floatformat:2 }}</span>
+                </div>
+                <form method="post" action="{% url 'add_to_cart' coffee.id %}" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <button type="submit" class="add-to-cart-btn">
+                        <span>Add to Cart</span>
+                    </button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="experiences" class="experiences">
+    <div class="section-heading">
+        <p class="kicker">Beyond the bar</p>
+        <h2>Experiences & community</h2>
+        <p>Reserve immersive tastings, team coffee rituals, and custom catering for gatherings.</p>
+    </div>
+    <ul class="experience-list">
+        {% for experience in experiences %}
+        <li>{{ experience }}</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="testimonials">
+    {% for testimonial in testimonials %}
+    <blockquote>
+        <p>“{{ testimonial.quote }}”</p>
+        <cite>— {{ testimonial.name }}</cite>
+    </blockquote>
+    {% endfor %}
+</section>
+
+<section id="visit" class="visit-cta">
+    <div>
+        <p class="kicker">Visit us</p>
+        <h2>Need beans for the office or a full espresso cart?</h2>
+        <p>We curate wholesale partnerships, host off-site popups, and roast custom blends.</p>
+    </div>
+    <a href="mailto:hello@brewbloom.cafe" class="cta-btn primary">Book a tasting</a>
+</section>
+{% endblock %}
+
