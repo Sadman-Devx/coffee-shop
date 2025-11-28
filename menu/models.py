@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Coffee(models.Model):
@@ -51,6 +53,53 @@ class Order(models.Model):
     def calculate_total(self):
         """Calculate total from order items"""
         return sum(item.subtotal() for item in self.items.all())
+    
+    def get_estimated_time(self):
+        """Calculate estimated delivery/preparation time based on status"""
+        if self.status == 'completed':
+            return "Delivered"
+        elif self.status == 'cancelled':
+            return "Cancelled"
+        
+        # Base preparation time: 15 minutes
+        base_time = 15
+        
+        # Add time based on number of items
+        item_count = sum(item.quantity for item in self.items.all())
+        additional_time = (item_count - 1) * 3  # 3 minutes per additional item
+        
+        # Status-based adjustments
+        status_times = {
+            'pending': base_time + additional_time,
+            'confirmed': base_time + additional_time - 2,
+            'preparing': base_time + additional_time - 5,
+            'ready': 0,
+        }
+        
+        estimated_minutes = status_times.get(self.status, base_time + additional_time)
+        
+        if estimated_minutes <= 0:
+            return "Ready for pickup"
+        elif estimated_minutes < 60:
+            return f"{estimated_minutes} minutes"
+        else:
+            hours = estimated_minutes // 60
+            minutes = estimated_minutes % 60
+            if minutes > 0:
+                return f"{hours}h {minutes}m"
+            return f"{hours} hour{'s' if hours > 1 else ''}"
+    
+    def get_status_display_class(self):
+        """Get CSS class for status badge"""
+        status_classes = {
+            'pending': 'status-pending',
+            'confirmed': 'status-confirmed',
+            'preparing': 'status-preparing',
+            'ready': 'status-ready',
+            'completed': 'status-completed',
+            'cancelled': 'status-cancelled',
+        }
+        return status_classes.get(self.status, 'status-pending')
 
 
 class OrderItem(models.Model):

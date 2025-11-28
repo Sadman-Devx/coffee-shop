@@ -44,7 +44,10 @@
 
         <div class="confirmation-actions">
             <p class="confirmation-note">We'll contact you at {{ order.customer_email }} or {{ order.customer_phone }} to confirm your order.</p>
-            <a href="{% url 'home' %}" class="cta-btn primary">Back to Home</a>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                <a href="{% url 'track_orders' %}" class="cta-btn primary">Track My Orders</a>
+                <a href="{% url 'home' %}" class="cta-btn ghost">Back to Home</a>
+            </div>
         </div>
     </div>
 </section>

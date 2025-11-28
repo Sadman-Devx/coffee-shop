@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="order-detail-section">
+    <div class="order-detail-card">
+        <div class="order-detail-header">
+            <h1>Order #{{ order.id }}</h1>
+            <div class="order-status-large">
+                <span class="status-badge {{ order.get_status_display_class }}">
+                    {{ order.get_status_display }}
+                </span>
+                <div class="estimated-time-large">
+                    <span class="time-icon">⏱️</span>
+                    <div>
+                        <strong>Estimated Time:</strong>
+                        <span class="time-value">{{ order.get_estimated_time }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-info-grid">
+            <div class="info-card">
+                <h3>Order Information</h3>
+                <div class="info-row">
+                    <span>Order Date:</span>
+                    <strong>{{ order.created_at|date:"F d, Y g:i A" }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Status:</span>
+                    <span class="status-badge {{ order.get_status_display_class }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span>Total Amount:</span>
+                    <strong class="total-amount">${{ order.total_amount|floatformat:2 }}</strong>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Customer Information</h3>
+                <div class="info-row">
+                    <span>Name:</span>
+                    <strong>{{ order.customer_name }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Email:</span>
+                    <strong>{{ order.customer_email }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Phone:</span>
+                    <strong>{{ order.customer_phone }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-items-detail">
+            <h2>Order Items</h2>
+            <div class="items-list">
+                {% for item in order.items.all %}
+                <div class="order-item-detail">
+                    <div class="item-info">
+                        <h4>{{ item.coffee.name }}</h4>
+                        <p class="item-origin">{{ item.coffee.origin }}</p>
+                        <p class="item-notes">{{ item.coffee.notes }}</p>
+                    </div>
+                    <div class="item-quantity">
+                        <span>Quantity: <strong>{{ item.quantity }}</strong></span>
+                    </div>
+                    <div class="item-price">
+                        <span>${{ item.price|floatformat:2 }} each</span>
+                        <strong>${{ item.subtotal|floatformat:2 }} total</strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if order.notes %}
+        <div class="order-notes">
+            <h3>Special Instructions</h3>
+            <p>{{ order.notes }}</p>
+        </div>
+        {% endif %}
+
+        <div class="order-actions">
+            <a href="{% url 'track_orders' %}" class="cta-btn ghost">Back to Orders</a>
+            <a href="{% url 'home' %}" class="cta-btn primary">Continue Shopping</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

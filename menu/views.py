@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.db import models
 from .models import Coffee, Order, OrderItem
 import json
 
@@ -269,3 +270,37 @@ def order_confirmation(request, order_id):
         'cart_count': 0,
     }
     return render(request, "menu/order_confirmation.html", context)
+
+
+def track_orders(request):
+    """Display order tracking page - search by email or phone"""
+    orders = None
+    search_query = None
+    
+    if request.method == 'POST':
+        search_query = request.POST.get('search', '').strip()
+        if search_query:
+            # Search by email or phone
+            orders = Order.objects.filter(
+                models.Q(customer_email__icontains=search_query) |
+                models.Q(customer_phone__icontains=search_query)
+            ).order_by('-created_at')[:10]  # Limit to 10 most recent
+    
+    context = {
+        'orders': orders,
+        'search_query': search_query,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/track_orders.html", context)
+
+
+def view_order(request, order_id):
+    """View detailed order information"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    context = {
+        'order': order,
+        'estimated_time': order.get_estimated_time(),
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/view_order.html", context)
