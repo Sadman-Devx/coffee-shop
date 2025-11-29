@@ -28,6 +28,16 @@
                 <span>Order Date:</span>
                 <span>{{ order.created_at|date:"F d, Y g:i A" }}</span>
             </div>
+            {% if time_remaining %}
+            <div class="detail-row highlight">
+                <span>⏱️ Estimated Ready Time:</span>
+                <strong>{{ time_remaining }} minutes</strong>
+            </div>
+            <div class="detail-row">
+                <span>Ready By:</span>
+                <span>{{ order.estimated_ready_time|date:"g:i A" }}</span>
+            </div>
+            {% endif %}
         </div>
 
         <div class="order-items-summary">
@@ -44,8 +54,8 @@
 
         <div class="confirmation-actions">
             <p class="confirmation-note">We'll contact you at {{ order.customer_email }} or {{ order.customer_phone }} to confirm your order.</p>
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                <a href="{% url 'track_orders' %}" class="cta-btn primary">Track My Orders</a>
+            <div class="action-buttons">
+                <a href="{% url 'track_order' order.id %}" class="cta-btn primary">Track Your Order</a>
                 <a href="{% url 'home' %}" class="cta-btn ghost">Back to Home</a>
             </div>
         </div>

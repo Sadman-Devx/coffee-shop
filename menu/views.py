@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.db import models
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import Coffee, Order, OrderItem
 import json
 
@@ -251,9 +252,13 @@ def place_order(request):
         except Coffee.DoesNotExist:
             continue
     
-    # Update order total
+    # Update order total and calculate estimated time
     order.total_amount = total
+    order.calculate_estimated_time()
     order.save()
+    
+    # Store order ID in session for tracking
+    request.session['last_order_id'] = order.id
     
     # Clear cart
     request.session['cart'] = {}
@@ -265,42 +270,77 @@ def place_order(request):
 def order_confirmation(request, order_id):
     """Display order confirmation page"""
     order = get_object_or_404(Order, id=order_id)
+    time_remaining = order.get_time_remaining()
     context = {
         'order': order,
+        'time_remaining': time_remaining,
         'cart_count': 0,
     }
     return render(request, "menu/order_confirmation.html", context)
 
 
-def track_orders(request):
-    """Display order tracking page - search by email or phone"""
+def track_order(request, order_id):
+    """Display order tracking page"""
+    order = get_object_or_404(Order, id=order_id)
+    time_remaining = order.get_time_remaining()
+    context = {
+        'order': order,
+        'time_remaining': time_remaining,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/track_order.html", context)
+
+
+def my_orders(request):
+    """Display user's orders by email or phone"""
+    email = request.GET.get('email', '').strip()
+    phone = request.GET.get('phone', '').strip()
     orders = None
-    search_query = None
     
-    if request.method == 'POST':
-        search_query = request.POST.get('search', '').strip()
-        if search_query:
-            # Search by email or phone
-            orders = Order.objects.filter(
-                models.Q(customer_email__icontains=search_query) |
-                models.Q(customer_phone__icontains=search_query)
-            ).order_by('-created_at')[:10]  # Limit to 10 most recent
+    if email:
+        orders = Order.objects.filter(customer_email=email).order_by('-created_at')
+    elif phone:
+        orders = Order.objects.filter(customer_phone=phone).order_by('-created_at')
     
     context = {
         'orders': orders,
-        'search_query': search_query,
+        'email': email,
+        'phone': phone,
         'cart_count': get_cart_count(request),
     }
-    return render(request, "menu/track_orders.html", context)
+    return render(request, "menu/my_orders.html", context)
 
 
-def view_order(request, order_id):
-    """View detailed order information"""
-    order = get_object_or_404(Order, id=order_id)
-    
-    context = {
-        'order': order,
-        'estimated_time': order.get_estimated_time(),
-        'cart_count': get_cart_count(request),
-    }
-    return render(request, "menu/view_order.html", context)
+def send_order_completion_notification(order):
+    """Send notification when order is completed"""
+    if order.status == 'completed' and order.completion_message:
+        subject = f"Your Order #{order.id} is Ready! ☕"
+        message = f"""
+Hello {order.customer_name},
+
+Great news! Your order is ready for pickup!
+
+{order.completion_message}
+
+Order Details:
+- Order #: {order.id}
+- Total: ${order.total_amount}
+- Status: {order.get_status_display()}
+
+Thank you for choosing Brew Bloom Coffee!
+
+Best regards,
+Brew Bloom Coffee Team
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [order.customer_email],
+                fail_silently=True,
+            )
+        except Exception as e:
+            # Email sending failed, but we'll still show the message on the site
+            pass

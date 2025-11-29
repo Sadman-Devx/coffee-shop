@@ -41,6 +41,8 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True)
+    estimated_ready_time = models.DateTimeField(null=True, blank=True)
+    completion_message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -54,43 +56,37 @@ class Order(models.Model):
         """Calculate total from order items"""
         return sum(item.subtotal() for item in self.items.all())
     
-    def get_estimated_time(self):
-        """Calculate estimated delivery/preparation time based on status"""
-        if self.status == 'completed':
-            return "Delivered"
-        elif self.status == 'cancelled':
-            return "Cancelled"
-        
-        # Base preparation time: 15 minutes
-        base_time = 15
-        
-        # Add time based on number of items
+    def calculate_estimated_time(self):
+        """Calculate estimated ready time based on order items"""
+        # Base time: 5 minutes
+        base_minutes = 5
+        # Add 2 minutes per item
         item_count = sum(item.quantity for item in self.items.all())
-        additional_time = (item_count - 1) * 3  # 3 minutes per additional item
+        total_minutes = base_minutes + (item_count * 2)
         
-        # Status-based adjustments
-        status_times = {
-            'pending': base_time + additional_time,
-            'confirmed': base_time + additional_time - 2,
-            'preparing': base_time + additional_time - 5,
-            'ready': 0,
-        }
+        if not self.estimated_ready_time:
+            self.estimated_ready_time = timezone.now() + timedelta(minutes=total_minutes)
+            self.save()
         
-        estimated_minutes = status_times.get(self.status, base_time + additional_time)
+        return self.estimated_ready_time
+    
+    def get_time_remaining(self):
+        """Get remaining time until order is ready"""
+        if not self.estimated_ready_time:
+            self.calculate_estimated_time()
         
-        if estimated_minutes <= 0:
-            return "Ready for pickup"
-        elif estimated_minutes < 60:
-            return f"{estimated_minutes} minutes"
-        else:
-            hours = estimated_minutes // 60
-            minutes = estimated_minutes % 60
-            if minutes > 0:
-                return f"{hours}h {minutes}m"
-            return f"{hours} hour{'s' if hours > 1 else ''}"
+        if self.status in ['completed', 'cancelled']:
+            return None
+        
+        now = timezone.now()
+        if self.estimated_ready_time > now:
+            delta = self.estimated_ready_time - now
+            minutes = int(delta.total_seconds() / 60)
+            return minutes
+        return 0
     
     def get_status_display_class(self):
-        """Get CSS class for status badge"""
+        """Get CSS class for status display"""
         status_classes = {
             'pending': 'status-pending',
             'confirmed': 'status-confirmed',

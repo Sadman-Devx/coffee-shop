@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Orders · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="my-orders-section">
+    <div class="section-heading">
+        <h1>My Orders</h1>
+        <p>Track all your orders</p>
+    </div>
+
+    <div class="search-orders">
+        <form method="get" class="search-form">
+            <div class="form-group">
+                <label for="email">Search by Email:</label>
+                <input type="email" id="email" name="email" value="{{ email }}" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label for="phone">Or by Phone:</label>
+                <input type="tel" id="phone" name="phone" value="{{ phone }}" placeholder="(555) 123-4567">
+            </div>
+            <button type="submit" class="cta-btn primary">Search Orders</button>
+        </form>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div>
+                    <h3>Order #{{ order.id }}</h3>
+                    <p class="order-date">{{ order.created_at|date:"F d, Y g:i A" }}</p>
+                </div>
+                <div class="order-status">
+                    <span class="status-badge {{ order.get_status_display_class }}">{{ order.get_status_display }}</span>
+                </div>
+            </div>
+
+            <div class="order-summary">
+                <div class="summary-item">
+                    <span>Items:</span>
+                    <span>
+                        {% for item in order.items.all %}
+                            {{ item.quantity }}x {{ item.coffee.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span>Total:</span>
+                    <strong>${{ order.total_amount|floatformat:2 }}</strong>
+                </div>
+                {% if order.get_time_remaining %}
+                <div class="summary-item highlight">
+                    <span>⏱️ Time Remaining:</span>
+                    <strong>{{ order.get_time_remaining }} minutes</strong>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if order.completion_message %}
+            <div class="order-message">
+                <strong>📬 Message:</strong> {{ order.completion_message }}
+            </div>
+            {% endif %}
+
+            <div class="order-actions">
+                <a href="{% url 'track_order' order.id %}" class="cta-btn primary">Track Order</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif email or phone %}
+    <div class="no-orders">
+        <p>No orders found with the provided information.</p>
+        <p>Please check your email or phone number and try again.</p>
+    </div>
+    {% else %}
+    <div class="no-orders">
+        <p>Enter your email or phone number above to view your orders.</p>
+    </div>
+    {% endif %}
+
+    <div class="back-home">
+        <a href="{% url 'home' %}" class="cta-btn ghost">Back to Home</a>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Track Order #{{ order.id }} · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="track-order-section">
+    <div class="section-heading">
+        <h1>Track Your Order</h1>
+        <p>Order #{{ order.id }}</p>
+    </div>
+
+    <div class="track-order-container">
+        <div class="order-status-card">
+            <div class="status-header">
+                <h2>Order Status</h2>
+                <span class="status-badge-large {{ order.get_status_display_class }}">{{ order.get_status_display }}</span>
+            </div>
+
+            {% if time_remaining is not None %}
+            <div class="time-remaining">
+                {% if time_remaining > 0 %}
+                <div class="time-display">
+                    <span class="time-number">{{ time_remaining }}</span>
+                    <span class="time-label">minutes remaining</span>
+                </div>
+                <p class="ready-by">Ready by: {{ order.estimated_ready_time|date:"g:i A" }}</p>
+                {% else %}
+                <div class="time-display ready">
+                    <span class="time-label">Your order should be ready!</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if order.completion_message %}
+            <div class="completion-message">
+                <h3>📬 Message from Us:</h3>
+                <p>{{ order.completion_message }}</p>
+            </div>
+            {% endif %}
+
+            <div class="status-timeline">
+                <div class="timeline-item {% if order.status != 'pending' %}completed{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <strong>Order Placed</strong>
+                        <span>{{ order.created_at|date:"M d, g:i A" }}</span>
+                    </div>
+                </div>
+                <div class="timeline-item {% if order.status in 'confirmed,preparing,ready,completed' %}completed{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <strong>Confirmed</strong>
+                        <span>We're preparing your order</span>
+                    </div>
+                </div>
+                <div class="timeline-item {% if order.status in 'preparing,ready,completed' %}completed{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <strong>Preparing</strong>
+                        <span>Our baristas are crafting your coffee</span>
+                    </div>
+                </div>
+                <div class="timeline-item {% if order.status in 'ready,completed' %}completed{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <strong>Ready</strong>
+                        <span>Your order is ready for pickup!</span>
+                    </div>
+                </div>
+                <div class="timeline-item {% if order.status == 'completed' %}completed{% endif %}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <strong>Completed</strong>
+                        <span>Thank you for your order!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-items-card">
+            <h2>Order Items</h2>
+            <div class="track-order-items">
+                {% for item in order.items.all %}
+                <div class="track-order-item">
+                    <div class="item-image">
+                        {% if item.coffee.image %}
+                        <img src="{{ item.coffee.image }}" alt="{{ item.coffee.name }}">
+                        {% else %}
+                        <div class="item-placeholder">☕</div>
+                        {% endif %}
+                    </div>
+                    <div class="item-details">
+                        <h3>{{ item.coffee.name }}</h3>
+                        <p class="item-origin">{{ item.coffee.origin }}</p>
+                        <p class="item-quantity">Quantity: {{ item.quantity }}</p>
+                    </div>
+                    <div class="item-price">
+                        ${{ item.subtotal|floatformat:2 }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="order-total">
+                <span>Total:</span>
+                <strong>${{ order.total_amount|floatformat:2 }}</strong>
+            </div>
+        </div>
+
+        <div class="order-info-card">
+            <h2>Order Information</h2>
+            <div class="info-row">
+                <span>Customer Name:</span>
+                <span>{{ order.customer_name }}</span>
+            </div>
+            <div class="info-row">
+                <span>Email:</span>
+                <span>{{ order.customer_email }}</span>
+            </div>
+            <div class="info-row">
+                <span>Phone:</span>
+                <span>{{ order.customer_phone }}</span>
+            </div>
+            <div class="info-row">
+                <span>Order Date:</span>
+                <span>{{ order.created_at|date:"F d, Y g:i A" }}</span>
+            </div>
+            {% if order.notes %}
+            <div class="info-row">
+                <span>Special Notes:</span>
+                <span>{{ order.notes }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="track-actions">
+        <a href="{% url 'my_orders' %}?email={{ order.customer_email }}" class="cta-btn ghost">View All Orders</a>
+        <a href="{% url 'home' %}" class="cta-btn primary">Back to Home</a>
+    </div>
+</section>
+
+<script>
+// Auto-refresh every 30 seconds to update order status
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}
+
