@@ -96,6 +96,23 @@ class Order(models.Model):
             'cancelled': 'status-cancelled',
         }
         return status_classes.get(self.status, 'status-pending')
+    
+    def check_and_update_status(self):
+        """Auto-update status if estimated time has passed"""
+        if self.status in ['completed', 'cancelled']:
+            return
+        
+        if self.estimated_ready_time:
+            now = timezone.now()
+            # If time has passed and still pending/confirmed, update to ready
+            if now >= self.estimated_ready_time:
+                if self.status in ['pending', 'confirmed']:
+                    self.status = 'ready'
+                    self.save()
+                elif self.status == 'preparing':
+                    # If preparing and time passed, mark as ready
+                    self.status = 'ready'
+                    self.save()
 
 
 class OrderItem(models.Model):
@@ -111,3 +128,33 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity}x {self.coffee.name}"
+
+
+class Feedback(models.Model):
+    """Customer feedback/review model"""
+    RATING_CHOICES = [
+        (5, '⭐⭐⭐⭐⭐ Excellent'),
+        (4, '⭐⭐⭐⭐ Very Good'),
+        (3, '⭐⭐⭐ Good'),
+        (2, '⭐⭐ Fair'),
+        (1, '⭐ Poor'),
+    ]
+    
+    order = models.ForeignKey(Order, related_name='feedbacks', on_delete=models.CASCADE)
+    customer_name = models.CharField(max_length=200)
+    customer_email = models.EmailField()
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)  # For moderation
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Feedbacks'
+    
+    def __str__(self):
+        return f"Feedback for Order #{self.order.id} - {self.rating} stars"
+    
+    def get_rating_stars(self):
+        """Get star display for rating"""
+        return '⭐' * self.rating

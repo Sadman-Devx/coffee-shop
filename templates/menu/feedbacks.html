@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Customer Reviews · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="feedbacks-section">
+    <div class="section-heading">
+        <h1>Customer Reviews</h1>
+        <p>See what our customers are saying about us</p>
+    </div>
+
+    {% if feedbacks %}
+    <div class="feedbacks-list">
+        {% for feedback in feedbacks %}
+        <div class="feedback-item">
+            <div class="feedback-header">
+                <div>
+                    <div class="feedback-customer">{{ feedback.customer_name }}</div>
+                    <div class="feedback-order">Order #{{ feedback.order.id }}</div>
+                </div>
+                <div class="feedback-rating">{{ feedback.get_rating_stars }}</div>
+            </div>
+            {% if feedback.comment %}
+            <div class="feedback-comment">
+                "{{ feedback.comment }}"
+            </div>
+            {% endif %}
+            <div class="feedback-date">
+                {{ feedback.created_at|date:"F d, Y" }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-feedbacks">
+        <p>No reviews yet. Be the first to share your experience!</p>
+    </div>
+    {% endif %}
+
+    <div class="back-home">
+        <a href="{% url 'home' %}" class="cta-btn primary">Back to Home</a>
+    </div>
+</section>
+{% endblock %}
+

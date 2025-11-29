@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
-from .models import Coffee, Order, OrderItem
+from .models import Coffee, Order, OrderItem, Feedback
 import json
 
 
@@ -340,10 +340,17 @@ def order_confirmation(request, order_id):
         Order.objects.prefetch_related('items__coffee'),
         id=order_id
     )
+    # Auto-update status if time has passed
+    order.check_and_update_status()
     time_remaining = order.get_time_remaining()
+    
+    # Check if feedback already submitted
+    has_feedback = order.feedbacks.exists()
+    
     context = {
         'order': order,
         'time_remaining': time_remaining,
+        'has_feedback': has_feedback,
         'cart_count': 0,
     }
     return render(request, "menu/order_confirmation.html", context)
@@ -356,10 +363,17 @@ def track_order(request, order_id):
         Order.objects.prefetch_related('items__coffee'),
         id=order_id
     )
+    # Auto-update status if time has passed
+    order.check_and_update_status()
     time_remaining = order.get_time_remaining()
+    
+    # Check if feedback already submitted
+    has_feedback = order.feedbacks.exists()
+    
     context = {
         'order': order,
         'time_remaining': time_remaining,
+        'has_feedback': has_feedback,
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/track_order.html", context)
@@ -380,6 +394,11 @@ def my_orders(request):
         orders = Order.objects.filter(
             customer_phone=phone
         ).prefetch_related('items__coffee').order_by('-created_at')
+    
+    # Auto-update status for all orders if time has passed
+    if orders:
+        for order in orders:
+            order.check_and_update_status()
     
     context = {
         'orders': orders,
@@ -423,3 +442,58 @@ Brew Bloom Coffee Team
         except Exception as e:
             # Email sending failed, but we'll still show the message on the site
             pass
+
+
+@require_POST
+def submit_feedback(request, order_id):
+    """Submit customer feedback for an order"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Check if feedback already exists
+    if order.feedbacks.exists():
+        messages.warning(request, "You have already submitted feedback for this order.")
+        return redirect('track_order', order_id=order_id)
+    
+    # Get feedback data
+    customer_name = request.POST.get('customer_name', '').strip()
+    customer_email = request.POST.get('customer_email', '').strip()
+    rating = int(request.POST.get('rating', 0))
+    comment = request.POST.get('comment', '').strip()
+    
+    # Validate
+    if not all([customer_name, customer_email, rating]):
+        messages.error(request, "Please fill in all required fields!")
+        return redirect('track_order', order_id=order_id)
+    
+    if rating < 1 or rating > 5:
+        messages.error(request, "Please select a valid rating!")
+        return redirect('track_order', order_id=order_id)
+    
+    # Verify email matches order
+    if customer_email.lower() != order.customer_email.lower():
+        messages.error(request, "Email does not match the order. Please use the email used for this order.")
+        return redirect('track_order', order_id=order_id)
+    
+    # Create feedback
+    feedback = Feedback.objects.create(
+        order=order,
+        customer_name=customer_name,
+        customer_email=customer_email,
+        rating=rating,
+        comment=comment,
+        approved=True  # Auto-approve for now
+    )
+    
+    messages.success(request, "Thank you for your feedback! We appreciate your input.")
+    return redirect('track_order', order_id=order_id)
+
+
+def view_feedbacks(request):
+    """Display all approved feedbacks"""
+    feedbacks = Feedback.objects.filter(approved=True).select_related('order').order_by('-created_at')[:10]
+    
+    context = {
+        'feedbacks': feedbacks,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/feedbacks.html", context)

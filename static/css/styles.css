@@ -1425,6 +1425,144 @@ html {
     }
 }
 
+/* Feedback Section */
+.feedback-section {
+    margin: 3rem 0;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.feedback-card {
+    background: var(--bg-card-light);
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.feedback-card h2 {
+    margin-top: 0;
+    font-family: "Playfair Display", serif;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-card > p {
+    color: var(--muted);
+    margin-bottom: 2rem;
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rating-select {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.rating-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.feedback-thanks {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(127, 209, 201, 0.15);
+    border-left: 4px solid var(--accent-secondary);
+    border-radius: 0.5rem;
+    text-align: center;
+    color: var(--accent-secondary);
+    font-size: 1.1rem;
+}
+
+.feedback-prompt {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(242, 164, 79, 0.1);
+    border-radius: 1rem;
+    text-align: center;
+    border: 1px solid rgba(242, 164, 79, 0.2);
+}
+
+.feedback-prompt p {
+    margin-bottom: 1rem;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.status-note {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* Feedbacks Display Page */
+.feedbacks-section {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.feedbacks-list {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feedback-item {
+    background: var(--bg-card-light);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.feedback-rating {
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.feedback-customer {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.feedback-order {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.feedback-comment {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.feedback-date {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 1rem;
+}
+
 
  
  

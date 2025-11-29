@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Coffee, Order, OrderItem
+from .models import Coffee, Order, OrderItem, Feedback
 from .views import send_order_completion_notification
 
 
@@ -48,3 +48,23 @@ class OrderAdmin(admin.ModelAdmin):
                 send_order_completion_notification(obj)
         
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['order', 'customer_name', 'rating', 'approved', 'created_at']
+    list_filter = ['approved', 'rating', 'created_at']
+    search_fields = ['customer_name', 'customer_email', 'comment', 'order__id']
+    list_editable = ['approved']
+    readonly_fields = ['created_at']
+    fieldsets = (
+        ('Order Information', {
+            'fields': ('order',)
+        }),
+        ('Customer Information', {
+            'fields': ('customer_name', 'customer_email')
+        }),
+        ('Feedback', {
+            'fields': ('rating', 'comment', 'approved', 'created_at')
+        }),
+    )

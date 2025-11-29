@@ -58,6 +58,12 @@
                 <a href="{% url 'track_order' order.id %}" class="cta-btn primary">Track Your Order</a>
                 <a href="{% url 'home' %}" class="cta-btn ghost">Back to Home</a>
             </div>
+            {% if order.status == 'completed' and not has_feedback %}
+            <div class="feedback-prompt">
+                <p>💬 After receiving your order, please share your feedback!</p>
+                <a href="{% url 'track_order' order.id %}#feedback" class="cta-btn">Leave Feedback</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>

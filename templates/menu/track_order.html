@@ -27,7 +27,10 @@
                 <p class="ready-by">Ready by: {{ order.estimated_ready_time|date:"g:i A" }}</p>
                 {% else %}
                 <div class="time-display ready">
-                    <span class="time-label">Your order should be ready!</span>
+                    <span class="time-label">⏰ Your order should be ready!</span>
+                    {% if order.status == 'pending' or order.status == 'confirmed' %}
+                    <p class="status-note">Status will update automatically to "Ready"</p>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -134,6 +137,46 @@
             {% endif %}
         </div>
     </div>
+
+    {% if order.status == 'completed' and not has_feedback %}
+    <div class="feedback-section">
+        <div class="feedback-card">
+            <h2>Share Your Experience</h2>
+            <p>We'd love to hear about your experience! Please leave us a review.</p>
+            <form method="post" action="{% url 'submit_feedback' order.id %}" class="feedback-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="feedback_name">Your Name *</label>
+                    <input type="text" id="feedback_name" name="customer_name" value="{{ order.customer_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="feedback_email">Your Email *</label>
+                    <input type="email" id="feedback_email" name="customer_email" value="{{ order.customer_email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="feedback_rating">Rating *</label>
+                    <select id="feedback_rating" name="rating" required class="rating-select">
+                        <option value="">Select Rating</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ Very Good</option>
+                        <option value="3">⭐⭐⭐ Good</option>
+                        <option value="2">⭐⭐ Fair</option>
+                        <option value="1">⭐ Poor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="feedback_comment">Your Feedback (Optional)</label>
+                    <textarea id="feedback_comment" name="comment" rows="4" placeholder="Tell us about your experience..."></textarea>
+                </div>
+                <button type="submit" class="cta-btn primary">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+    {% elif has_feedback %}
+    <div class="feedback-thanks">
+        <p>✅ Thank you for your feedback! We appreciate your input.</p>
+    </div>
+    {% endif %}
 
     <div class="track-actions">
         <a href="{% url 'my_orders' %}?email={{ order.customer_email }}" class="cta-btn ghost">View All Orders</a>
