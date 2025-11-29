@@ -17,8 +17,26 @@
     box-sizing: border-box;
 }
 
+html {
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    background: radial-gradient(circle at top, rgba(242, 164, 79, 0.25), transparent 55%) fixed,
+        radial-gradient(circle at 20% 20%, rgba(127, 209, 201, 0.23), transparent 60%) fixed,
+        var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    padding-bottom: 4rem;
+}
     background: radial-gradient(circle at top, rgba(242, 164, 79, 0.25), transparent 55%) fixed,
         radial-gradient(circle at 20% 20%, rgba(127, 209, 201, 0.23), transparent 60%) fixed,
         var(--bg);
@@ -30,6 +48,13 @@ body {
 
 .site-body {
     padding: 0 1.5rem;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+main {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .messages-container {
@@ -84,6 +109,9 @@ body {
     background: rgba(15, 15, 15, 0.8);
     backdrop-filter: blur(30px);
     z-index: 10;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .logo-mark {
