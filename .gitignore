@@ -32,6 +32,11 @@ db.sqlite3-journal
 /staticfiles/
 /media/
 
+# Log files
+install.log
+pip_install.log
+*.log
+
 # IDE
 .vscode/
 .idea/
