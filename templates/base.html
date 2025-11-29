@@ -46,6 +46,108 @@
     <footer class="site-footer">
         <p>© {% now "Y" %} Brew Bloom Coffee · Crafted with Django</p>
     </footer>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- JavaScript for AJAX and UX improvements -->
+    <script>
+        // Toast notification system
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // AJAX cart operations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle add to cart forms
+            const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+            addToCartForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const button = this.querySelector('.add-to-cart-btn');
+                    const btnText = button.querySelector('.btn-text');
+                    const btnLoading = button.querySelector('.btn-loading');
+                    const coffeeName = button.getAttribute('data-coffee-name');
+                    
+                    // Show loading state
+                    btnText.style.display = 'none';
+                    btnLoading.style.display = 'inline';
+                    button.disabled = true;
+                    
+                    // Get CSRF token
+                    const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    // Send AJAX request
+                    fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update cart badge
+                            const cartBadge = document.querySelector('.cart-badge');
+                            if (cartBadge) {
+                                cartBadge.textContent = data.cart_count;
+                            } else {
+                                const cartLink = document.querySelector('.cart-link');
+                                if (data.cart_count > 0) {
+                                    const badge = document.createElement('span');
+                                    badge.className = 'cart-badge';
+                                    badge.textContent = data.cart_count;
+                                    cartLink.appendChild(badge);
+                                }
+                            }
+                            
+                            // Show success toast
+                            showToast(data.message, 'success');
+                            
+                            // Add animation to button
+                            button.classList.add('success-animation');
+                            setTimeout(() => button.classList.remove('success-animation'), 600);
+                        }
+                    })
+                    .catch(error => {
+                        showToast('Something went wrong. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        // Reset button
+                        btnText.style.display = 'inline';
+                        btnLoading.style.display = 'none';
+                        button.disabled = false;
+                    });
+                });
+            });
+            
+            // Auto-hide Django messages after 5 seconds
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>
 

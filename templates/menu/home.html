@@ -37,7 +37,50 @@
         <h2>Modern classics & seasonal innovations</h2>
         <p>Each recipe is dialed in daily to highlight the terroir of the bean and the craft of our baristas.</p>
     </div>
-    <div class="menu-grid">
+    
+    <!-- Search and Filter Bar -->
+    <div class="menu-filters">
+        <form method="get" action="{% url 'home' %}#menu" class="filter-form">
+            <div class="filter-group">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search coffees..." class="search-input">
+            </div>
+            <div class="filter-group">
+                <select name="origin" class="filter-select">
+                    <option value="">All Origins</option>
+                    {% for origin in all_origins %}
+                    <option value="{{ origin }}" {% if filter_origin == origin %}selected{% endif %}>{{ origin }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="strength" class="filter-select">
+                    <option value="">All Strengths</option>
+                    {% for strength in all_strengths %}
+                    <option value="{{ strength }}" {% if filter_strength == strength %}selected{% endif %}>{{ strength }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="sort" class="filter-select">
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Sort by Name</option>
+                    <option value="price_low" {% if sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price_high" {% if sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </div>
+            <button type="submit" class="filter-btn">Filter</button>
+            {% if search_query or filter_origin or filter_strength %}
+            <a href="{% url 'home' %}#menu" class="clear-btn">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+    
+    {% if search_query or filter_origin or filter_strength %}
+    <div class="filter-results">
+        <p>Found <strong>{{ coffees|length }}</strong> coffee{{ coffees|length|pluralize }}</p>
+    </div>
+    {% endif %}
+    
+    <div class="menu-grid" id="menu-grid">
         {% for coffee in coffees %}
         <article class="menu-card">
             <div class="menu-card-image">
@@ -55,10 +98,11 @@
                     <span class="menu-strength">{{ coffee.strength }}</span>
                     <span class="menu-price">${{ coffee.price|floatformat:2 }}</span>
                 </div>
-                <form method="post" action="{% url 'add_to_cart' coffee.id %}" class="add-to-cart-form">
+                <form method="post" action="{% url 'add_to_cart' coffee.id %}" class="add-to-cart-form" data-coffee-id="{{ coffee.id }}">
                     {% csrf_token %}
-                    <button type="submit" class="add-to-cart-btn">
-                        <span>Add to Cart</span>
+                    <button type="submit" class="add-to-cart-btn" data-coffee-name="{{ coffee.name }}">
+                        <span class="btn-text">Add to Cart</span>
+                        <span class="btn-loading" style="display: none;">Adding...</span>
                     </button>
                 </form>
             </div>

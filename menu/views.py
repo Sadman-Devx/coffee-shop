@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import models
 from .models import Coffee, Order, OrderItem
 import json
 
@@ -35,7 +36,42 @@ def get_cart_total(request):
 
 def home(request):
     """Render the main landing page with featured menu items."""
+    # Get search and filter parameters
+    search_query = request.GET.get('search', '').strip()
+    filter_origin = request.GET.get('origin', '').strip()
+    filter_strength = request.GET.get('strength', '').strip()
+    sort_by = request.GET.get('sort', 'name')
+    
+    # Optimize query - only fetch available coffees
     coffees = Coffee.objects.filter(available=True)
+    
+    # Apply search filter
+    if search_query:
+        coffees = coffees.filter(
+            models.Q(name__icontains=search_query) |
+            models.Q(notes__icontains=search_query) |
+            models.Q(origin__icontains=search_query)
+        )
+    
+    # Apply origin filter
+    if filter_origin:
+        coffees = coffees.filter(origin__icontains=filter_origin)
+    
+    # Apply strength filter
+    if filter_strength:
+        coffees = coffees.filter(strength__icontains=filter_strength)
+    
+    # Apply sorting
+    if sort_by == 'price_low':
+        coffees = coffees.order_by('price')
+    elif sort_by == 'price_high':
+        coffees = coffees.order_by('-price')
+    else:
+        coffees = coffees.order_by('name')
+    
+    # Get unique origins and strengths for filter dropdowns
+    all_origins = Coffee.objects.filter(available=True).values_list('origin', flat=True).distinct()
+    all_strengths = Coffee.objects.filter(available=True).values_list('strength', flat=True).distinct()
     
     highlights = {
         "tagline": "Small-batch roasting, all-day hospitality.",
@@ -67,6 +103,12 @@ def home(request):
         "experiences": experiences,
         "testimonials": testimonials,
         "cart_count": get_cart_count(request),
+        "search_query": search_query,
+        "filter_origin": filter_origin,
+        "filter_strength": filter_strength,
+        "sort_by": sort_by,
+        "all_origins": all_origins,
+        "all_strengths": all_strengths,
     }
     return render(request, "menu/home.html", context)
 
@@ -80,23 +122,32 @@ def add_to_cart(request, coffee_id):
     coffee_id_str = str(coffee_id)
     if coffee_id_str in cart:
         cart[coffee_id_str]['quantity'] += 1
+        action = 'updated'
     else:
         cart[coffee_id_str] = {
             'quantity': 1,
             'name': coffee.name,
             'price': str(coffee.price),
         }
+        action = 'added'
     
     request.session['cart'] = cart
-    messages.success(request, f"{coffee.name} added to cart!")
+    request.session.modified = True  # Ensure session is saved
     
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+    cart_count = get_cart_count(request)
+    cart_total = get_cart_total(request)
+    
+    # Always return JSON for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
         return JsonResponse({
             'success': True,
-            'cart_count': get_cart_count(request),
-            'message': f"{coffee.name} added to cart!"
+            'cart_count': cart_count,
+            'cart_total': f"{cart_total:.2f}",
+            'message': f"{coffee.name} {action} to cart!",
+            'action': action
         })
     
+    messages.success(request, f"{coffee.name} added to cart!")
     return redirect('home')
 
 
@@ -140,19 +191,23 @@ def update_cart(request, coffee_id):
     if quantity <= 0:
         if coffee_id_str in cart:
             del cart[coffee_id_str]
-            messages.success(request, f"{coffee.name} removed from cart")
+            message = f"{coffee.name} removed from cart"
+            messages.success(request, message)
     else:
         if coffee_id_str in cart:
             cart[coffee_id_str]['quantity'] = quantity
-            messages.success(request, f"{coffee.name} quantity updated")
+            message = f"{coffee.name} quantity updated"
+            messages.success(request, message)
     
     request.session['cart'] = cart
+    request.session.modified = True
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
             'cart_count': get_cart_count(request),
-            'cart_total': get_cart_total(request),
+            'cart_total': f"{get_cart_total(request):.2f}",
+            'message': message if 'message' in locals() else 'Cart updated'
         })
     
     return redirect('view_cart')
@@ -167,9 +222,20 @@ def remove_from_cart(request, coffee_id):
     
     if coffee_id_str in cart:
         del cart[coffee_id_str]
-        messages.success(request, f"{coffee.name} removed from cart")
+        message = f"{coffee.name} removed from cart"
+        messages.success(request, message)
     
     request.session['cart'] = cart
+    request.session.modified = True
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'cart_count': get_cart_count(request),
+            'cart_total': f"{get_cart_total(request):.2f}",
+            'message': message
+        })
+    
     return redirect('view_cart')
 
 
@@ -269,7 +335,11 @@ def place_order(request):
 
 def order_confirmation(request, order_id):
     """Display order confirmation page"""
-    order = get_object_or_404(Order, id=order_id)
+    # Optimize query
+    order = get_object_or_404(
+        Order.objects.prefetch_related('items__coffee'),
+        id=order_id
+    )
     time_remaining = order.get_time_remaining()
     context = {
         'order': order,
@@ -281,7 +351,11 @@ def order_confirmation(request, order_id):
 
 def track_order(request, order_id):
     """Display order tracking page"""
-    order = get_object_or_404(Order, id=order_id)
+    # Optimize query - prefetch related items to avoid N+1 queries
+    order = get_object_or_404(
+        Order.objects.prefetch_related('items__coffee'),
+        id=order_id
+    )
     time_remaining = order.get_time_remaining()
     context = {
         'order': order,
@@ -297,10 +371,15 @@ def my_orders(request):
     phone = request.GET.get('phone', '').strip()
     orders = None
     
+    # Optimize queries with prefetch_related
     if email:
-        orders = Order.objects.filter(customer_email=email).order_by('-created_at')
+        orders = Order.objects.filter(
+            customer_email=email
+        ).prefetch_related('items__coffee').order_by('-created_at')
     elif phone:
-        orders = Order.objects.filter(customer_phone=phone).order_by('-created_at')
+        orders = Order.objects.filter(
+            customer_phone=phone
+        ).prefetch_related('items__coffee').order_by('-created_at')
     
     context = {
         'orders': orders,
