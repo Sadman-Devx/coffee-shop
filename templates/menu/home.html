@@ -3,16 +3,28 @@
 {% block title %}Brew Bloom Coffee · Crafted Cups{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <p class="kicker">Neighborhood Coffee Atelier</p>
-    <h1>Slow-crafted coffee, intentionally served.</h1>
-    <p class="subhead">
-        Sustainably sourced beans roasted in micro-batches, a menu that evolves with the seasons,
-        and a space designed for genuine connection.
-    </p>
-    <div class="hero-actions">
-        <a href="#menu" class="cta-btn primary">Explore the menu</a>
-        <a href="#visit" class="cta-btn ghost">Plan a visit</a>
+<section class="hero-modern">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="hero-line">Discover</span>
+                <span class="hero-line">The Art Of</span>
+                <span class="hero-line">Perfect Coffee</span>
+            </h1>
+            <p class="hero-subhead">
+                Experience The Rich And Bold Flavors Of Our Exquisite Coffee Blends, Crafted To Awaken Your Senses And Start Your Day Right
+            </p>
+            <div class="hero-actions">
+                <a href="#menu" class="cta-btn-primary">Explore Menu</a>
+                <a href="{% url 'make_reservation' %}" class="cta-btn-secondary">Reserve Table</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="coffee-splash">
+                <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=800&q=80" alt="Coffee beans splashing into cup" class="splash-img">
+            </div>
+            <div class="hero-branding">BB</div>
+        </div>
     </div>
 </section>
 
