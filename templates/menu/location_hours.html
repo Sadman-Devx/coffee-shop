@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Location & Hours - Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Visit Us</h1>
+        <p class="subtitle">Come experience Brew Bloom in person</p>
+    </div>
+</section>
+
+<section class="location-section">
+    <div class="container">
+        <div class="location-grid">
+            <div class="location-info">
+                <h2>📍 Our Location</h2>
+                <div class="address-card">
+                    <h3>Brew Bloom Coffee</h3>
+                    <p>123 Coffee Street<br>
+                    Downtown District<br>
+                    City, State 12345</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn btn-secondary">Get Directions</a>
+                </div>
+                
+                <h2>🕐 Operating Hours</h2>
+                <div class="hours-card">
+                    <div class="hours-row">
+                        <span class="day">Monday - Friday</span>
+                        <span class="time">7:00 AM - 8:00 PM</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="day">Saturday</span>
+                        <span class="time">8:00 AM - 9:00 PM</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="day">Sunday</span>
+                        <span class="time">8:00 AM - 9:00 PM</span>
+                    </div>
+                </div>
+                
+                <h2>📞 Contact</h2>
+                <div class="contact-card">
+                    <p><strong>Phone:</strong> <a href="tel:5553228890">(555) 322-8890</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:info@brewbloom.com">info@brewbloom.com</a></p>
+                </div>
+            </div>
+            
+            <div class="location-features">
+                <h2>What to Expect</h2>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">☕</span>
+                        <div>
+                            <h3>Fresh Coffee</h3>
+                            <p>Daily roasted beans and expertly crafted beverages</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🪑</span>
+                        <div>
+                            <h3>Comfortable Seating</h3>
+                            <p>Cozy spaces for work, meetings, or relaxation</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📶</span>
+                        <div>
+                            <h3>Free WiFi</h3>
+                            <p>High-speed internet for all our guests</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🚗</span>
+                        <div>
+                            <h3>Parking Available</h3>
+                            <p>Convenient parking nearby</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">♿</span>
+                        <div>
+                            <h3>Accessible</h3>
+                            <p>Wheelchair accessible entrance and facilities</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

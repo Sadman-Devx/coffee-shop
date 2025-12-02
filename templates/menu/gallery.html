@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gallery - Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Gallery</h1>
+        <p class="subtitle">A glimpse into our coffee shop</p>
+    </div>
+</section>
+
+<section class="gallery-section">
+    <div class="container">
+        {% if images %}
+        <div class="gallery-grid">
+            {% for image in images %}
+            <div class="gallery-item {% if image.is_featured %}featured{% endif %}">
+                <img src="{{ image.image_url }}" alt="{{ image.title }}" loading="lazy">
+                <div class="gallery-overlay">
+                    <h3>{{ image.title }}</h3>
+                    {% if image.description %}
+                    <p>{{ image.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-gallery">
+            <p>Gallery images coming soon!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

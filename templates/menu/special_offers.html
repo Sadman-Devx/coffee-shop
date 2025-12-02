@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Special Offers - Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Special Offers</h1>
+        <p class="subtitle">Exclusive deals and promotions</p>
+    </div>
+</section>
+
+<section class="offers-section">
+    <div class="container">
+        {% if offers %}
+        <div class="offers-grid">
+            {% for offer in offers %}
+            <div class="offer-card">
+                {% if offer.image %}
+                <div class="offer-image">
+                    <img src="{{ offer.image }}" alt="{{ offer.title }}">
+                </div>
+                {% endif %}
+                <div class="offer-content">
+                    <div class="offer-badge">{{ offer.discount_percentage }}% OFF</div>
+                    <h2>{{ offer.title }}</h2>
+                    <p>{{ offer.description }}</p>
+                    {% if offer.code %}
+                    <div class="offer-code">
+                        <strong>Code:</strong> <span class="code-text">{{ offer.code }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="offer-validity">
+                        <small>Valid until {{ offer.valid_until|date:"F d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-offers">
+            <p>No special offers available at the moment. Check back soon!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Browse Menu</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

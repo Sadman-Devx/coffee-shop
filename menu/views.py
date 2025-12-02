@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import models
-from .models import Coffee, Order, OrderItem, Feedback
+from django.utils import timezone
+from .models import (Coffee, Order, OrderItem, Feedback, NewsletterSubscriber, 
+                     ContactMessage, SpecialOffer, Reservation, FAQ, GalleryImage)
 import json
 
 
@@ -497,3 +499,155 @@ def view_feedbacks(request):
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/feedbacks.html", context)
+
+
+def about_us(request):
+    """About Us page"""
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/about_us.html", context)
+
+
+@require_http_methods(["GET", "POST"])
+def contact_us(request):
+    """Contact Us page with form"""
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        subject = request.POST.get('subject', 'general')
+        message = request.POST.get('message', '').strip()
+        
+        if not all([name, email, message]):
+            messages.error(request, 'Please fill in all required fields.')
+        else:
+            ContactMessage.objects.create(
+                name=name,
+                email=email,
+                phone=phone,
+                subject=subject,
+                message=message
+            )
+            messages.success(request, 'Thank you for contacting us! We will get back to you soon.')
+            return redirect('contact_us')
+    
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/contact_us.html", context)
+
+
+def location_hours(request):
+    """Location and Hours page"""
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/location_hours.html", context)
+
+
+@require_http_methods(["POST"])
+def newsletter_subscribe(request):
+    """Newsletter subscription"""
+    email = request.POST.get('email', '').strip()
+    name = request.POST.get('name', '').strip()
+    
+    if not email:
+        return JsonResponse({'success': False, 'message': 'Email is required.'})
+    
+    subscriber, created = NewsletterSubscriber.objects.get_or_create(
+        email=email,
+        defaults={'name': name, 'is_active': True}
+    )
+    
+    if not created:
+        if subscriber.is_active:
+            return JsonResponse({'success': False, 'message': 'You are already subscribed!'})
+        else:
+            subscriber.is_active = True
+            subscriber.name = name
+            subscriber.save()
+    
+    return JsonResponse({'success': True, 'message': 'Thank you for subscribing!'})
+
+
+def special_offers(request):
+    """Special Offers page"""
+    now = timezone.now()
+    offers = SpecialOffer.objects.filter(
+        is_active=True,
+        valid_from__lte=now,
+        valid_until__gte=now
+    ).order_by('-created_at')
+    
+    context = {
+        'offers': offers,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/special_offers.html", context)
+
+
+def gallery(request):
+    """Gallery page"""
+    images = GalleryImage.objects.all().order_by('-is_featured', '-created_at')
+    categories = GalleryImage.objects.values_list('category', flat=True).distinct()
+    
+    context = {
+        'images': images,
+        'categories': categories,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/gallery.html", context)
+
+
+def faq(request):
+    """FAQ page"""
+    faqs = FAQ.objects.filter(is_active=True).order_by('order', 'question')
+    
+    context = {
+        'faqs': faqs,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/faq.html", context)
+
+
+@require_http_methods(["GET", "POST"])
+def make_reservation(request):
+    """Reservation booking page"""
+    if request.method == 'POST':
+        customer_name = request.POST.get('customer_name', '').strip()
+        customer_email = request.POST.get('customer_email', '').strip()
+        customer_phone = request.POST.get('customer_phone', '').strip()
+        event_type = request.POST.get('event_type', 'table')
+        reservation_date = request.POST.get('reservation_date', '').strip()
+        reservation_time = request.POST.get('reservation_time', '').strip()
+        number_of_guests = request.POST.get('number_of_guests', '2')
+        special_requests = request.POST.get('special_requests', '').strip()
+        
+        if not all([customer_name, customer_email, customer_phone, reservation_date, reservation_time]):
+            messages.error(request, 'Please fill in all required fields.')
+        else:
+            try:
+                from datetime import datetime
+                datetime_str = f"{reservation_date} {reservation_time}"
+                reservation_datetime = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+                reservation_datetime = timezone.make_aware(reservation_datetime)
+                
+                Reservation.objects.create(
+                    customer_name=customer_name,
+                    customer_email=customer_email,
+                    customer_phone=customer_phone,
+                    event_type=event_type,
+                    reservation_date=reservation_datetime,
+                    number_of_guests=int(number_of_guests),
+                    special_requests=special_requests
+                )
+                messages.success(request, 'Reservation request submitted! We will confirm shortly.')
+                return redirect('make_reservation')
+            except Exception as e:
+                messages.error(request, 'Invalid date/time format. Please try again.')
+    
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/reservation.html", context)

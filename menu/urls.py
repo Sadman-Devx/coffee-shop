@@ -14,4 +14,13 @@ urlpatterns = [
     path('order/<int:order_id>/feedback/', views.submit_feedback, name='submit_feedback'),
     path('my-orders/', views.my_orders, name='my_orders'),
     path('feedbacks/', views.view_feedbacks, name='view_feedbacks'),
+    # Business pages
+    path('about/', views.about_us, name='about_us'),
+    path('contact/', views.contact_us, name='contact_us'),
+    path('location/', views.location_hours, name='location_hours'),
+    path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('offers/', views.special_offers, name='special_offers'),
+    path('gallery/', views.gallery, name='gallery'),
+    path('faq/', views.faq, name='faq'),
+    path('reservation/', views.make_reservation, name='make_reservation'),
 ]

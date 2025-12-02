@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}FAQ - Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Frequently Asked Questions</h1>
+        <p class="subtitle">Everything you need to know</p>
+    </div>
+</section>
+
+<section class="faq-section">
+    <div class="container">
+        {% if faqs %}
+        <div class="faq-list">
+            {% for faq in faqs %}
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>{{ faq.question }}</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>{{ faq.answer|linebreaks }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-faq">
+            <p>No FAQs available at the moment.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const toggle = item.querySelector('.faq-toggle');
+        
+        question.addEventListener('click', function() {
+            const isOpen = item.classList.contains('active');
+            
+            // Close all other items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                    otherItem.querySelector('.faq-toggle').textContent = '+';
+                }
+            });
+            
+            // Toggle current item
+            if (isOpen) {
+                item.classList.remove('active');
+                toggle.textContent = '+';
+            } else {
+                item.classList.add('active');
+                toggle.textContent = '−';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

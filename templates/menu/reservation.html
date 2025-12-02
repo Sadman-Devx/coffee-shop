@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Make a Reservation - Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Make a Reservation</h1>
+        <p class="subtitle">Book a table or event space</p>
+    </div>
+</section>
+
+<section class="reservation-section">
+    <div class="container">
+        <div class="reservation-grid">
+            <div class="reservation-info">
+                <h2>Reservation Options</h2>
+                <div class="reservation-types">
+                    <div class="reservation-type">
+                        <h3>🪑 Table Reservation</h3>
+                        <p>Reserve a table for your visit. Perfect for casual dining or catching up with friends.</p>
+                    </div>
+                    <div class="reservation-type">
+                        <h3>🎉 Private Event</h3>
+                        <p>Host your special event in our private space. Ideal for parties and celebrations.</p>
+                    </div>
+                    <div class="reservation-type">
+                        <h3>💼 Meeting Room</h3>
+                        <p>Book our meeting room for business gatherings or presentations.</p>
+                    </div>
+                    <div class="reservation-type">
+                        <h3>🎂 Birthday Party</h3>
+                        <p>Celebrate your special day with us! We'll help make it memorable.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reservation-form-container">
+                <h2>Book Now</h2>
+                <form method="post" class="reservation-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="customer_name">Name *</label>
+                        <input type="text" id="customer_name" name="customer_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_email">Email *</label>
+                        <input type="email" id="customer_email" name="customer_email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer_phone">Phone *</label>
+                        <input type="tel" id="customer_phone" name="customer_phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event_type">Event Type *</label>
+                        <select id="event_type" name="event_type" required>
+                            <option value="table">Table Reservation</option>
+                            <option value="event">Private Event</option>
+                            <option value="meeting">Meeting Room</option>
+                            <option value="party">Birthday Party</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reservation_date">Date *</label>
+                            <input type="date" id="reservation_date" name="reservation_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reservation_time">Time *</label>
+                            <input type="time" id="reservation_time" name="reservation_time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="number_of_guests">Number of Guests *</label>
+                        <input type="number" id="number_of_guests" name="number_of_guests" min="1" max="50" value="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="special_requests">Special Requests</label>
+                        <textarea id="special_requests" name="special_requests" rows="4" placeholder="Any special requirements or requests..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Reservation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('reservation_date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+});
+</script>
+{% endblock %}
+
