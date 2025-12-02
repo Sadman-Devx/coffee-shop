@@ -508,18 +508,15 @@ def view_feedbacks(request):
         # Get rating distribution - optimized: use single query with values()
         from django.db.models import Count
         rating_distribution = feedbacks.values('rating').annotate(count=Count('id'))
-        rating_counts = {}
-        rating_percentages = {}
+        rating_data = {}
         for i in range(5, 0, -1):
-            rating_counts[i] = 0
-            rating_percentages[i] = 0
+            rating_data[i] = {'count': 0, 'percentage': 0}
         
         for item in rating_distribution:
             rating = item['rating']
             count = item['count']
-            rating_counts[rating] = count
-            # Calculate percentage
-            rating_percentages[rating] = round((count / total_count) * 100, 1)
+            percentage = round((count / total_count) * 100, 1) if total_count > 0 else 0
+            rating_data[rating] = {'count': count, 'percentage': percentage}
     else:
         avg_rating = 0
         rating_data = {i: {'count': 0, 'percentage': 0} for i in range(5, 0, -1)}
