@@ -4,7 +4,7 @@
     --bg-dark: #000000;
     --bg-card: rgba(255, 255, 255, 0.05);
     --bg-card-light: rgba(255, 255, 255, 0.08);
-    --accent: #ffd700;
+    --accent: #d37f01b2;
     --accent-secondary: #ffed4e;
     --accent-tertiary: #ffaa00;
     --text: #ffffff;
@@ -483,7 +483,7 @@ html {
 .indicator.active {
     background: var(--accent);
     border-color: var(--accent-secondary);
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 10px rgba(243, 211, 33, 0.5);
     transform: scale(1.3);
 }
 
