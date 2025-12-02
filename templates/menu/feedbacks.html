@@ -30,13 +30,13 @@
             </div>
             
             <div class="rating-breakdown">
-                {% for rating, count in rating_counts.items %}
+                {% for rating, data in rating_data.items %}
                 <div class="rating-bar-item">
                     <span class="rating-label">{{ rating }} Star{{ rating|pluralize }}</span>
                     <div class="rating-bar">
-                        <div class="rating-bar-fill" style="width: {% if total_reviews > 0 %}{{ count|mul:100|div:total_reviews|floatformat:1 }}{% else %}0{% endif %}%"></div>
+                        <div class="rating-bar-fill" style="width: {{ data.percentage }}%"></div>
                     </div>
-                    <span class="rating-count">{{ count }}</span>
+                    <span class="rating-count">{{ data.count }}</span>
                 </div>
                 {% endfor %}
             </div>

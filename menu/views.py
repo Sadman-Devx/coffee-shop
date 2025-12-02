@@ -508,12 +508,21 @@ def view_feedbacks(request):
         # Get rating distribution - optimized: use single query with values()
         from django.db.models import Count
         rating_distribution = feedbacks.values('rating').annotate(count=Count('id'))
-        rating_counts = {i: 0 for i in range(5, 0, -1)}
+        rating_counts = {}
+        rating_percentages = {}
+        for i in range(5, 0, -1):
+            rating_counts[i] = 0
+            rating_percentages[i] = 0
+        
         for item in rating_distribution:
-            rating_counts[item['rating']] = item['count']
+            rating = item['rating']
+            count = item['count']
+            rating_counts[rating] = count
+            # Calculate percentage
+            rating_percentages[rating] = round((count / total_count) * 100, 1)
     else:
         avg_rating = 0
-        rating_counts = {i: 0 for i in range(5, 0, -1)}
+        rating_data = {i: {'count': 0, 'percentage': 0} for i in range(5, 0, -1)}
     
     # Get recent feedbacks (last 20)
     recent_feedbacks = list(feedbacks[:20])
@@ -522,7 +531,7 @@ def view_feedbacks(request):
         'feedbacks': recent_feedbacks,
         'avg_rating': avg_rating,
         'total_reviews': total_count,
-        'rating_counts': rating_counts,
+        'rating_data': rating_data,
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/feedbacks.html", context)
