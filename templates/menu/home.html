@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Brew Bloom Coffee · Crafted Cups{% endblock %}
 
@@ -20,8 +21,21 @@
             </div>
         </div>
         <div class="hero-image">
-            <div class="coffee-splash">
-                <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=800&q=80" alt="Coffee beans splashing into cup" class="splash-img">
+            <div class="coffee-carousel">
+                <div class="carousel-container">
+                    <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=800&q=80" alt="Coffee beans splashing into cup" class="carousel-img active">
+                    <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800&q=80" alt="Coffee cup" class="carousel-img">
+                    <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=80" alt="Coffee beans" class="carousel-img">
+                    <img src="https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=800&q=80" alt="Coffee preparation" class="carousel-img">
+                    <img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800&q=80" alt="Latte art" class="carousel-img">
+                </div>
+                <div class="carousel-indicators">
+                    <span class="indicator active" data-slide="0"></span>
+                    <span class="indicator" data-slide="1"></span>
+                    <span class="indicator" data-slide="2"></span>
+                    <span class="indicator" data-slide="3"></span>
+                    <span class="indicator" data-slide="4"></span>
+                </div>
             </div>
             <div class="hero-branding">BB</div>
         </div>

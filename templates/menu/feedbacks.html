@@ -18,7 +18,7 @@
                     <span class="rating-number">{{ avg_rating }}</span>
                     <div class="rating-stars-large">
                         {% for i in "12345" %}
-                            {% if forloop.counter <= avg_rating|floatformat:0|add:"0" %}
+                            {% if forloop.counter <= avg_rating|floatformat:0|add:"0"|floatformat:0 %}
                                 <span class="star-filled">⭐</span>
                             {% else %}
                                 <span class="star-empty">☆</span>
@@ -34,7 +34,7 @@
                 <div class="rating-bar-item">
                     <span class="rating-label">{{ rating }} Star{{ rating|pluralize }}</span>
                     <div class="rating-bar">
-                        <div class="rating-bar-fill" style="width: {% if total_reviews > 0 %}{{ count|floatformat:0|add:"0"|mul:100|div:total_reviews }}{% else %}0{% endif %}%"></div>
+                        <div class="rating-bar-fill" style="width: {% if total_reviews > 0 %}{{ count|mul:100|div:total_reviews|floatformat:1 }}{% else %}0{% endif %}%"></div>
                     </div>
                     <span class="rating-count">{{ count }}</span>
                 </div>

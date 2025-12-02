@@ -498,22 +498,30 @@ def view_feedbacks(request):
     # Get all approved feedbacks with optimized query
     feedbacks = Feedback.objects.filter(approved=True).select_related('order').order_by('-created_at')
     
-    # Calculate average rating
-    avg_rating = feedbacks.aggregate(models.Avg('rating'))['rating__avg'] or 0
-    avg_rating = round(avg_rating, 1)
+    # Calculate average rating - fix: use the queryset before slicing
+    total_count = feedbacks.count()
     
-    # Get rating distribution
-    rating_counts = {}
-    for i in range(5, 0, -1):
-        rating_counts[i] = feedbacks.filter(rating=i).count()
+    if total_count > 0:
+        avg_rating = feedbacks.aggregate(models.Avg('rating'))['rating__avg'] or 0
+        avg_rating = round(avg_rating, 1)
+        
+        # Get rating distribution - optimized: use single query with values()
+        from django.db.models import Count
+        rating_distribution = feedbacks.values('rating').annotate(count=Count('id'))
+        rating_counts = {i: 0 for i in range(5, 0, -1)}
+        for item in rating_distribution:
+            rating_counts[item['rating']] = item['count']
+    else:
+        avg_rating = 0
+        rating_counts = {i: 0 for i in range(5, 0, -1)}
     
     # Get recent feedbacks (last 20)
-    recent_feedbacks = feedbacks[:20]
+    recent_feedbacks = list(feedbacks[:20])
     
     context = {
         'feedbacks': recent_feedbacks,
         'avg_rating': avg_rating,
-        'total_reviews': feedbacks.count(),
+        'total_reviews': total_count,
         'rating_counts': rating_counts,
         'cart_count': get_cart_count(request),
     }
