@@ -167,5 +167,45 @@
     </div>
     <a href="mailto:hello@brewbloom.cafe" class="cta-btn primary">Book a tasting</a>
 </section>
+
+<script>
+// Image Carousel Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.carousel-img');
+    const indicators = document.querySelectorAll('.indicator');
+    let currentIndex = 0;
+    const intervalTime = 4000; // 4 seconds
+    
+    function showSlide(index) {
+        // Hide all images
+        images.forEach(img => img.classList.remove('active'));
+        indicators.forEach(ind => ind.classList.remove('active'));
+        
+        // Show current image
+        if (images[index]) {
+            images[index].classList.add('active');
+        }
+        if (indicators[index]) {
+            indicators[index].classList.add('active');
+        }
+    }
+    
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % images.length;
+        showSlide(currentIndex);
+    }
+    
+    // Auto-advance carousel
+    setInterval(nextSlide, intervalTime);
+    
+    // Indicator click handlers
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', function() {
+            currentIndex = index;
+            showSlide(currentIndex);
+        });
+    });
+});
+</script>
 {% endblock %}
 
