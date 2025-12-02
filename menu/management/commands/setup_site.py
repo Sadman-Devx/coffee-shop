@@ -102,6 +102,22 @@ class Command(BaseCommand):
                 "notes": "Nitro pour, dark cocoa, smoked sea salt",
                 "image": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&h=600&fit=crop",
             },
+            {
+                "name": "Vanilla Bean Macchiato",
+                "price": 5.50,
+                "origin": "Kenyan AA",
+                "strength": "Smooth & Aromatic",
+                "notes": "Espresso shots, vanilla bean syrup, caramel drizzle, steamed milk",
+                "image": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&h=600&fit=crop",
+            },
+            {
+                "name": "Caramel Cloud Latte",
+                "price": 5.75,
+                "origin": "Peruvian Organic",
+                "strength": "Light & Fluffy",
+                "notes": "Cloud foam, rich caramel sauce, espresso, cinnamon dust",
+                "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop",
+            },
         ]
 
         created_count = 0

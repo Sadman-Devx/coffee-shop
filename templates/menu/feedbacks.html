@@ -5,41 +5,75 @@
 
 {% block content %}
 <section class="feedbacks-section">
-    <div class="section-heading">
-        <h1>Customer Reviews</h1>
-        <p>See what our customers are saying about us</p>
-    </div>
+    <div class="container">
+        <div class="section-heading">
+            <h1>Customer Reviews</h1>
+            <p>See what our customers are saying about us</p>
+        </div>
 
-    {% if feedbacks %}
-    <div class="feedbacks-list">
-        {% for feedback in feedbacks %}
-        <div class="feedback-item">
-            <div class="feedback-header">
-                <div>
-                    <div class="feedback-customer">{{ feedback.customer_name }}</div>
-                    <div class="feedback-order">Order #{{ feedback.order.id }}</div>
+        {% if total_reviews > 0 %}
+        <div class="reviews-summary">
+            <div class="summary-card">
+                <div class="avg-rating">
+                    <span class="rating-number">{{ avg_rating }}</span>
+                    <div class="rating-stars-large">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating|floatformat:0|add:"0" %}
+                                <span class="star-filled">⭐</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="total-reviews-text">{{ total_reviews }} Review{{ total_reviews|pluralize }}</p>
                 </div>
-                <div class="feedback-rating">{{ feedback.get_rating_stars }}</div>
             </div>
-            {% if feedback.comment %}
-            <div class="feedback-comment">
-                "{{ feedback.comment }}"
-            </div>
-            {% endif %}
-            <div class="feedback-date">
-                {{ feedback.created_at|date:"F d, Y" }}
+            
+            <div class="rating-breakdown">
+                {% for rating, count in rating_counts.items %}
+                <div class="rating-bar-item">
+                    <span class="rating-label">{{ rating }} Star{{ rating|pluralize }}</span>
+                    <div class="rating-bar">
+                        <div class="rating-bar-fill" style="width: {% if total_reviews > 0 %}{{ count|floatformat:0|add:"0"|mul:100|div:total_reviews }}{% else %}0{% endif %}%"></div>
+                    </div>
+                    <span class="rating-count">{{ count }}</span>
+                </div>
+                {% endfor %}
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="no-feedbacks">
-        <p>No reviews yet. Be the first to share your experience!</p>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    <div class="back-home">
-        <a href="{% url 'home' %}" class="cta-btn primary">Back to Home</a>
+        {% if feedbacks %}
+        <div class="feedbacks-list">
+            {% for feedback in feedbacks %}
+            <div class="feedback-item">
+                <div class="feedback-header">
+                    <div>
+                        <div class="feedback-customer">{{ feedback.customer_name }}</div>
+                        <div class="feedback-order">Order #{{ feedback.order.id }}</div>
+                    </div>
+                    <div class="feedback-rating">{{ feedback.get_rating_stars }}</div>
+                </div>
+                {% if feedback.comment %}
+                <div class="feedback-comment">
+                    "{{ feedback.comment }}"
+                </div>
+                {% endif %}
+                <div class="feedback-date">
+                    {{ feedback.created_at|date:"F d, Y" }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-feedbacks">
+            <p>No reviews yet. Be the first to share your experience!</p>
+        </div>
+        {% endif %}
+
+        <div class="back-home">
+            <a href="{% url 'home' %}" class="cta-btn-primary">Back to Home</a>
+        </div>
     </div>
 </section>
 {% endblock %}

@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.core.mail import send_mail
@@ -491,11 +494,27 @@ def submit_feedback(request, order_id):
 
 
 def view_feedbacks(request):
-    """Display all approved feedbacks"""
-    feedbacks = Feedback.objects.filter(approved=True).select_related('order').order_by('-created_at')[:10]
+    """Display all approved feedbacks with improved efficiency"""
+    # Get all approved feedbacks with optimized query
+    feedbacks = Feedback.objects.filter(approved=True).select_related('order').order_by('-created_at')
+    
+    # Calculate average rating
+    avg_rating = feedbacks.aggregate(models.Avg('rating'))['rating__avg'] or 0
+    avg_rating = round(avg_rating, 1)
+    
+    # Get rating distribution
+    rating_counts = {}
+    for i in range(5, 0, -1):
+        rating_counts[i] = feedbacks.filter(rating=i).count()
+    
+    # Get recent feedbacks (last 20)
+    recent_feedbacks = feedbacks[:20]
     
     context = {
-        'feedbacks': feedbacks,
+        'feedbacks': recent_feedbacks,
+        'avg_rating': avg_rating,
+        'total_reviews': feedbacks.count(),
+        'rating_counts': rating_counts,
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/feedbacks.html", context)
@@ -651,3 +670,79 @@ def make_reservation(request):
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/reservation.html", context)
+
+
+def signup_view(request):
+    """User registration/signup"""
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('password_confirm', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        
+        if not all([username, email, password, password_confirm]):
+            messages.error(request, 'Please fill in all required fields.')
+        elif password != password_confirm:
+            messages.error(request, 'Passwords do not match.')
+        elif len(password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists. Please choose another.')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already registered. Please use another email or login.')
+        else:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            messages.success(request, f'Account created successfully! Welcome, {user.username}!')
+            login(request, user)
+            return redirect('home')
+    
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/signup.html", context)
+
+
+def login_view(request):
+    """User login"""
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        if not all([username, password]):
+            messages.error(request, 'Please enter both username and password.')
+        else:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}!')
+                next_url = request.GET.get('next', 'home')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Invalid username or password. Please try again.')
+    
+    context = {
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/login.html", context)
+
+
+@login_required
+def logout_view(request):
+    """User logout"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('home')

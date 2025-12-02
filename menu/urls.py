@@ -23,4 +23,8 @@ urlpatterns = [
     path('gallery/', views.gallery, name='gallery'),
     path('faq/', views.faq, name='faq'),
     path('reservation/', views.make_reservation, name='make_reservation'),
+    # Authentication
+    path('signup/', views.signup_view, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
 ]
