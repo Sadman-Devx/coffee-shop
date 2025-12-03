@@ -26,7 +26,7 @@ class Command(BaseCommand):
         created = 0
         updated = 0
 
-        for idx, img_path in enumerate(sorted(files)):
+        for idx, img_path in enumerate[Path](sorted(files)):
             url = settings.STATIC_URL.rstrip("/") + f"/img/gallery/{img_path.name}"
             title = img_path.stem.replace("_", " ").replace("-", " ").title()
 
