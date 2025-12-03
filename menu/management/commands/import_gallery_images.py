@@ -26,13 +26,17 @@ class Command(BaseCommand):
         created = 0
         updated = 0
 
-        for idx, img_path in enumerate[Path](sorted(files)):
-            url = settings.STATIC_URL.rstrip("/") + f"/img/gallery/{img_path.name}"
+        for idx, img_path in enumerate(sorted(files)):
+            path_suffix = f"/img/gallery/{img_path.name}"
+            url = settings.STATIC_URL.rstrip("/") + path_suffix
+            if not url.startswith("/"):
+                url = "/" + url
             title = img_path.stem.replace("_", " ").replace("-", " ").title()
 
             obj, was_created = GalleryImage.objects.update_or_create(
-                image_url=url,
+                image_url__endswith=path_suffix,
                 defaults={
+                    "image_url": url,
                     "title": title,
                     "description": "",
                     "category": "shop",
