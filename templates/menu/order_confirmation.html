@@ -45,6 +45,17 @@
                 <span>Delivery Method:</span>
                 <span>{{ order.get_delivery_option_display }}</span>
             </div>
+            {% if order.delivery_option == 'delivery' and order.delivery_address %}
+            <div class="detail-row stacked">
+                <span>Delivery Address:</span>
+                <div>
+                    <div>{{ order.delivery_address }}</div>
+                    {% if order.delivery_city %}
+                    <div>{{ order.delivery_city }}{% if order.delivery_postal_code %}, {{ order.delivery_postal_code }}{% endif %}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
             <div class="detail-row">
                 <span>Payment Method:</span>
                 <span>{{ order.get_payment_method_display }}</span>

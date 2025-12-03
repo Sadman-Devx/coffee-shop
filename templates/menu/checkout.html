@@ -33,11 +33,11 @@
 
             <div class="panel-card">
                 <h2>Delivery Method</h2>
-                <p class="panel-subtitle">Choose how you’d like to receive your order. Only confirmed guests will see reservations.</p>
+                <p class="panel-subtitle">Choose how you'd like to receive your order.</p>
                 <div class="select-grid">
                     {% for option in delivery_options %}
                     <label class="select-card {% if delivery_option == option.value %}active{% endif %}">
-                        <input type="radio" name="delivery_option" value="{{ option.value }}" data-fee="{{ option.fee|floatformat:2 }}" {% if delivery_option == option.value %}checked{% endif %}>
+                        <input type="radio" name="delivery_option" value="{{ option.value }}" data-fee="{{ option.fee|floatformat:2 }}" {% if delivery_option == option.value %}checked{% endif %} id="delivery-{{ option.value }}">
                         <div class="select-card-body">
                             <div class="select-card-header">
                                 <span class="card-icon">{{ option.icon }}</span>
@@ -53,6 +53,25 @@
                         </div>
                     </label>
                     {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel-card" id="delivery-address-section" style="display: none;">
+                <h2>Delivery Address</h2>
+                <p class="panel-subtitle">Where should we deliver your order?</p>
+                <div class="form-group">
+                    <label for="delivery_address">Street Address *</label>
+                    <textarea id="delivery_address" name="delivery_address" rows="2" placeholder="123 Main Street, Apt 4B"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="delivery_city">City *</label>
+                        <input type="text" id="delivery_city" name="delivery_city" placeholder="New York">
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery_postal_code">Postal Code *</label>
+                        <input type="text" id="delivery_postal_code" name="delivery_postal_code" placeholder="10001">
+                    </div>
                 </div>
             </div>
 
@@ -168,10 +187,33 @@ document.addEventListener('DOMContentLoaded', function() {
         finalTotalEl.textContent = `$${finalTotal.toFixed(2)}`;
     }
 
+    // Show/hide delivery address section
+    const addressSection = document.getElementById('delivery-address-section');
+    const addressFields = addressSection.querySelectorAll('input, textarea');
+    
+    function toggleAddressSection() {
+        const selectedDelivery = document.querySelector('input[name="delivery_option"]:checked');
+        if (selectedDelivery && selectedDelivery.value === 'delivery') {
+            addressSection.style.display = 'block';
+            addressFields.forEach(field => field.required = true);
+        } else {
+            addressSection.style.display = 'none';
+            addressFields.forEach(field => {
+                field.required = false;
+                field.value = '';
+            });
+        }
+    }
+    
     document.querySelectorAll('input[name="delivery_option"]').forEach(radio => {
-        radio.addEventListener('change', updateFinalTotal);
+        radio.addEventListener('change', function() {
+            updateFinalTotal();
+            toggleAddressSection();
+        });
     });
+    
     updateFinalTotal();
+    toggleAddressSection(); // Initial check
 
     if (discountBtn) {
         discountBtn.addEventListener('click', function() {

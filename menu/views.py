@@ -490,10 +490,21 @@ def place_order(request):
     payment_method = request.POST.get('payment_method', 'cash')
     discount_code_input = request.POST.get('discount_code', '').strip()
     
+    # Get delivery address (required for delivery orders)
+    delivery_address = request.POST.get('delivery_address', '').strip()
+    delivery_city = request.POST.get('delivery_city', '').strip()
+    delivery_postal_code = request.POST.get('delivery_postal_code', '').strip()
+    
     # Validate required fields
     if not all([customer_name, customer_email, customer_phone]):
         messages.error(request, "Please fill in all required fields!")
         return redirect('checkout')
+    
+    # Validate delivery address if delivery option is selected
+    if delivery_option == 'delivery':
+        if not all([delivery_address, delivery_city, delivery_postal_code]):
+            messages.error(request, "Please provide a complete delivery address!")
+            return redirect('checkout')
     
     if delivery_option not in DELIVERY_FEES:
         delivery_option = 'pickup'
@@ -521,6 +532,9 @@ def place_order(request):
         customer_name=customer_name,
         customer_email=customer_email,
         customer_phone=customer_phone,
+        delivery_address=delivery_address,
+        delivery_city=delivery_city,
+        delivery_postal_code=delivery_postal_code,
         notes=notes,
         status='pending',
         delivery_option=delivery_option,
