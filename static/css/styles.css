@@ -3168,6 +3168,43 @@ html {
     flex-wrap: wrap;
 }
 
+/* Scroll animations */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    transition-delay: var(--delay, 0s);
+}
+
+.animate-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes floatGlow {
+    0% {
+        transform: translateY(0px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+    100% {
+        transform: translateY(-8px);
+        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.35);
+    }
+}
+
+.service-card:hover {
+    animation: floatGlow 1s ease forwards;
+}
+
+.menu-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+}
+
+.menu-card {
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
 @media (max-width: 960px) {
     .checkout-grid {
         grid-template-columns: 1fr;

@@ -43,28 +43,28 @@
 </section>
 
 <section id="highlights" class="highlight-grid">
-    <article class="highlight-card">
+    <article class="highlight-card animate-on-scroll" data-animate-delay="0.05s">
         <h3>{{ highlights.tagline }}</h3>
         <p>{{ highlights.hours }}</p>
     </article>
-    <article class="highlight-card">
+    <article class="highlight-card animate-on-scroll" data-animate-delay="0.15s">
         <h3>Find us</h3>
         <p>{{ highlights.address }}</p>
     </article>
-    <article class="highlight-card">
+    <article class="highlight-card animate-on-scroll" data-animate-delay="0.25s">
         <h3>Call ahead</h3>
         <p>{{ highlights.phone }}</p>
     </article>
 </section>
 
 <section class="service-flow" id="delivery">
-    <div class="section-heading">
+    <div class="section-heading animate-on-scroll">
         <p class="kicker">Delivery · Order · Shopping</p>
         <h2>Choose how the coffee ritual meets you</h2>
-        <p>Inspired by modern retail flows from <a href="https://www.sketchflow.ai/share/88D78A90E2B244799CA17926DF0A3B9E" target="_blank" rel="noopener">SketchFlow</a>, we built ultra-clear options for every guest journey.</p>
+        <p>We built ultra-clear options for every guest journey—whether you are shopping beans, hosting a tasting, or summoning a courier.</p>
     </div>
     <div class="service-flow-grid">
-        <article class="service-card">
+        <article class="service-card animate-on-scroll" data-animate-delay="0.05s">
             <div class="service-icon">🛍️</div>
             <h3>Order & Shop</h3>
             <p>Curate beans, merch, and house syrups online. Pick up in-store or have a courier drop it off.</p>
@@ -74,7 +74,7 @@
                 <li>Shareable shopping lists</li>
             </ul>
         </article>
-        <article class="service-card">
+        <article class="service-card animate-on-scroll" data-animate-delay="0.15s">
             <div class="service-icon">🚲</div>
             <h3>Delivery Moments</h3>
             <p>Messenger partners keep pours upright from our bar to your door with thermal carriers.</p>
@@ -84,7 +84,7 @@
                 <li>Estimated arrival 30-40 mins</li>
             </ul>
         </article>
-        <article class="service-card">
+        <article class="service-card animate-on-scroll" data-animate-delay="0.25s">
             <div class="service-icon">🪑</div>
             <h3>Dine-in & Reservations</h3>
             <p>Reserve tasting flights, team off-sites, or hold a table. Only confirmed guests can view itineraries.</p>
@@ -94,7 +94,7 @@
                 <li>Concierge for groups 6+</li>
             </ul>
         </article>
-        <article class="service-card">
+        <article class="service-card animate-on-scroll" data-animate-delay="0.35s">
             <div class="service-icon">📦</div>
             <h3>Subscriptions & Gifts</h3>
             <p>Set-and-forget deliveries of seasonal beans with brewer cards and brewing ratios.</p>
@@ -112,7 +112,7 @@
 </section>
 
 <section id="menu" class="menu-section">
-    <div class="section-heading">
+    <div class="section-heading animate-on-scroll">
         <p class="kicker">Signature pours</p>
         <h2>Modern classics & seasonal innovations</h2>
         <p>Each recipe is dialed in daily to highlight the terroir of the bean and the craft of our baristas.</p>
@@ -162,7 +162,7 @@
     
     <div class="menu-grid" id="menu-grid">
         {% for coffee in coffees %}
-        <article class="menu-card">
+        <article class="menu-card animate-on-scroll" data-animate-delay="0.{{ forloop.counter|stringformat:'d' }}s">
             <div class="menu-card-image">
                 {% if coffee.image %}
                 <img src="{{ coffee.image }}" alt="{{ coffee.name }}" loading="lazy">
@@ -192,21 +192,21 @@
 </section>
 
 <section id="experiences" class="experiences">
-    <div class="section-heading">
+    <div class="section-heading animate-on-scroll">
         <p class="kicker">Beyond the bar</p>
         <h2>Experiences & community</h2>
         <p>Reserve immersive tastings, team coffee rituals, and custom catering for gatherings.</p>
     </div>
     <ul class="experience-list">
         {% for experience in experiences %}
-        <li>{{ experience }}</li>
+        <li class="animate-on-scroll" data-animate-delay="0.{{ forloop.counter|stringformat:'d' }}s">{{ experience }}</li>
         {% endfor %}
     </ul>
 </section>
 
 <section class="testimonials">
     {% for testimonial in testimonials %}
-    <blockquote>
+    <blockquote class="animate-on-scroll" data-animate-delay="0.{{ forloop.counter|stringformat:'d' }}s">
         <p>“{{ testimonial.quote }}”</p>
         <cite>— {{ testimonial.name }}</cite>
     </blockquote>
@@ -223,7 +223,7 @@
 </section>
 
 <script>
-// Image Carousel Functionality
+// Image Carousel + Scroll Animations
 document.addEventListener('DOMContentLoaded', function() {
     const images = document.querySelectorAll('.carousel-img');
     const indicators = document.querySelectorAll('.indicator');
@@ -231,11 +231,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const intervalTime = 4000; // 4 seconds
     
     function showSlide(index) {
-        // Hide all images
         images.forEach(img => img.classList.remove('active'));
         indicators.forEach(ind => ind.classList.remove('active'));
-        
-        // Show current image
         if (images[index]) {
             images[index].classList.add('active');
         }
@@ -248,17 +245,28 @@ document.addEventListener('DOMContentLoaded', function() {
         currentIndex = (currentIndex + 1) % images.length;
         showSlide(currentIndex);
     }
-    
-    // Auto-advance carousel
     setInterval(nextSlide, intervalTime);
-    
-    // Indicator click handlers
     indicators.forEach((indicator, index) => {
         indicator.addEventListener('click', function() {
             currentIndex = index;
             showSlide(currentIndex);
         });
     });
+
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const delay = el.dataset.animateDelay || '0s';
+                el.style.setProperty('--delay', delay);
+                el.classList.add('is-visible');
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.15 });
+    
+    animatedElements.forEach(el => observer.observe(el));
 });
 </script>
 {% endblock %}
