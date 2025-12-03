@@ -35,11 +35,38 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
+    FULFILLMENT_CHOICES = [
+        ('pickup', 'Pickup at Store'),
+        ('delivery', 'Courier Delivery'),
+        ('dine_in', 'Dine-in Service'),
+        ('curbside', 'Curbside'),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Pay in Store'),
+        ('card', 'Credit/Debit Card'),
+        ('wallet', 'Mobile Wallet'),
+    ]
+
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
     customer_name = models.CharField(max_length=200)
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=20)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    delivery_option = models.CharField(max_length=20, choices=FULFILLMENT_CHOICES, default='pickup')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_code = models.CharField(max_length=50, blank=True)
+    discount_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    delivery_fee = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    final_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notes = models.TextField(blank=True)
     estimated_ready_time = models.DateTimeField(null=True, blank=True)
     completion_message = models.TextField(blank=True)

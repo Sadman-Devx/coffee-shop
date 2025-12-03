@@ -20,13 +20,34 @@
                 <span>Status:</span>
                 <span class="status-badge">{{ order.get_status_display }}</span>
             </div>
-            <div class="detail-row">
-                <span>Total Amount:</span>
-                <strong>${{ order.total_amount|floatformat:2 }}</strong>
+            <div class="detail-row stacked">
+                <span>Pricing:</span>
+                <div class="pricing-breakdown">
+                    <div><small>Subtotal</small> <strong>${{ order.total_amount|floatformat:2 }}</strong></div>
+                    {% if order.discount_amount > 0 %}
+                    <div><small>Discount {% if order.discount_code %}({{ order.discount_code }}){% endif %}</small> <strong>- ${{ order.discount_amount|floatformat:2 }}</strong></div>
+                    {% endif %}
+                    {% if order.delivery_fee > 0 %}
+                    <div><small>Delivery</small> <strong>${{ order.delivery_fee|floatformat:2 }}</strong></div>
+                    {% else %}
+                    <div><small>Delivery</small> <strong>Free</strong></div>
+                    {% endif %}
+                    {% with final_total=order.final_amount|default:order.total_amount %}
+                    <div class="final-total"><small>Final Total</small> <strong>${{ final_total|floatformat:2 }}</strong></div>
+                    {% endwith %}
+                </div>
             </div>
             <div class="detail-row">
                 <span>Order Date:</span>
                 <span>{{ order.created_at|date:"F d, Y g:i A" }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Delivery Method:</span>
+                <span>{{ order.get_delivery_option_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span>Payment Method:</span>
+                <span>{{ order.get_payment_method_display }}</span>
             </div>
             {% if time_remaining %}
             <div class="detail-row highlight">

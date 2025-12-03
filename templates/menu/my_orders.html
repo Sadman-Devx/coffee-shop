@@ -48,8 +48,12 @@
                     </span>
                 </div>
                 <div class="summary-item">
-                    <span>Total:</span>
-                    <strong>${{ order.total_amount|floatformat:2 }}</strong>
+                    <span>Final Total:</span>
+                    <strong>${{ order.final_amount|floatformat:2 }}</strong>
+                </div>
+                <div class="summary-item">
+                    <span>Delivery:</span>
+                    <span>{{ order.get_delivery_option_display }}</span>
                 </div>
                 {% if order.get_time_remaining %}
                 <div class="summary-item highlight">

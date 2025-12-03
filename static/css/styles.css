@@ -2854,6 +2854,335 @@ html {
     color: var(--accent);
 }
 
+/* Modern cart & checkout */
+.summary-note {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin: 0.5rem 0 1rem;
+}
+
+.summary-row.discount,
+.summary-row.discount-row {
+    color: #f5a524;
+}
+
+.summary-row.discount.hidden {
+    display: none;
+}
+
+.checkout-section {
+    padding: 4rem 1.5rem 2rem;
+}
+
+.checkout-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.checkout-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.panel-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    backdrop-filter: blur(12px);
+}
+
+.panel-card h2 {
+    margin-top: 0;
+}
+
+.panel-subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.payment-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.select-card {
+    position: relative;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: border 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.select-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.select-card-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.select-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.card-icon {
+    font-size: 1.5rem;
+}
+
+.select-card input:checked + .select-card-body,
+.select-card:hover .select-card-body,
+.select-card.active .select-card-body {
+    border-radius: 1rem;
+    border: 1px solid var(--accent);
+    box-shadow: 0 15px 40px rgba(215, 148, 47, 0.15);
+}
+
+.discount-row-control {
+    margin-top: 1.25rem;
+}
+
+.discount-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.discount-input input {
+    flex: 1;
+}
+
+.discount-input button {
+    background: var(--accent);
+    border: none;
+    color: #1c1208;
+    padding: 0 1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.discount-input button:hover {
+    transform: translateY(-1px);
+}
+
+#discount-feedback {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+#discount-feedback.success {
+    color: #9beacf;
+}
+
+#discount-feedback.error {
+    color: #ff8a8a;
+}
+
+.checkout-summary .summary-card {
+    position: sticky;
+    top: 120px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Service flow inspired by SketchFlow */
+.service-flow {
+    padding: 4rem 1.5rem;
+}
+
+.service-flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.service-card {
+    background: var(--bg-card);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.service-card ul {
+    padding-left: 1.1rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.service-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.service-flow-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Reservation self-serve portal */
+.my-reservations-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+}
+
+.reservation-search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 2rem;
+}
+
+.reservation-search-form .form-hint {
+    grid-column: 1 / -1;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.reservation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.reservation-card {
+    background: var(--bg-card);
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reservation-card header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.status-pill {
+    border-radius: 999px;
+    padding: 0.2rem 0.85rem;
+    font-size: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-pill.status-confirmed {
+    border-color: rgba(127, 209, 201, 0.6);
+    color: #7fd1c9;
+}
+
+.reservation-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: var(--muted);
+}
+
+.reservation-hint {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
+.no-reservations {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Pricing breakdown for confirmation & tracking */
+.detail-row.stacked {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.pricing-breakdown {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    color: var(--muted);
+}
+
+.pricing-breakdown .final-total {
+    color: var(--text);
+}
+
+.order-total .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+
+.order-total .summary-row.total {
+    margin-top: 0.8rem;
+    font-size: 1.1rem;
+}
+
+.my-reservations-section .back-home {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkout-summary .summary-card {
+        position: static;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .hero-container {

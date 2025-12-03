@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Reservations · Brew Bloom Coffee{% endblock %}
+
+{% block content %}
+<section class="my-reservations-section">
+    <div class="section-heading">
+        <h1>Reservation Lookup</h1>
+        <p>For privacy, only confirmed reservations show after you verify email & phone.</p>
+    </div>
+
+    <form method="get" class="reservation-search-form">
+        <div class="form-group">
+            <label for="reservation_email">Email *</label>
+            <input type="email" id="reservation_email" name="email" value="{{ email }}" required placeholder="you@email.com">
+        </div>
+        <div class="form-group">
+            <label for="reservation_phone">Phone *</label>
+            <input type="tel" id="reservation_phone" name="phone" value="{{ phone }}" required placeholder="(555) 123-4567">
+        </div>
+        <button type="submit" class="cta-btn primary">Find Reservation</button>
+        <p class="form-hint">Need help? <a href="{% url 'contact_us' %}">Contact us</a> or <a href="{% url 'make_reservation' %}">make a new reservation</a>.</p>
+    </form>
+
+    {% if reservations %}
+    {% if upcoming_reservations %}
+    <div class="reservation-group">
+        <h2>Upcoming</h2>
+        <div class="reservation-grid">
+            {% for reservation in upcoming_reservations %}
+            <article class="reservation-card">
+                <header>
+                    <div>
+                        <h3>{{ reservation.get_event_type_display }}</h3>
+                        <p>{{ reservation.reservation_date|date:"F d, Y · g:i A" }}</p>
+                    </div>
+                    <span class="status-pill status-confirmed">Confirmed</span>
+                </header>
+                <ul>
+                    <li>Guests: <strong>{{ reservation.number_of_guests }}</strong></li>
+                    <li>Contact: <strong>{{ reservation.customer_phone }}</strong></li>
+                    {% if reservation.special_requests %}
+                    <li>Notes: <span>{{ reservation.special_requests }}</span></li>
+                    {% endif %}
+                </ul>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if past_reservations %}
+    <div class="reservation-group past">
+        <h2>Past Visits</h2>
+        <div class="reservation-grid">
+            {% for reservation in past_reservations %}
+            <article class="reservation-card">
+                <header>
+                    <div>
+                        <h3>{{ reservation.get_event_type_display }}</h3>
+                        <p>{{ reservation.reservation_date|date:"F d, Y · g:i A" }}</p>
+                    </div>
+                    <span class="status-pill">Completed</span>
+                </header>
+                <ul>
+                    <li>Guests: <strong>{{ reservation.number_of_guests }}</strong></li>
+                    {% if reservation.special_requests %}
+                    <li>Notes: <span>{{ reservation.special_requests }}</span></li>
+                    {% endif %}
+                </ul>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% elif email and phone %}
+    <div class="no-reservations">
+        <p>No confirmed reservations found yet. If you just submitted a request, it may still be pending.</p>
+    </div>
+    {% else %}
+    <div class="no-reservations">
+        <p>Enter your email and phone to view your confirmed reservations.</p>
+    </div>
+    {% endif %}
+
+    <div class="back-home">
+        <a href="{% url 'make_reservation' %}" class="cta-btn primary">Book Another Reservation</a>
+        <a href="{% url 'home' %}" class="cta-btn ghost">Back to Home</a>
+    </div>
+</section>
+{% endblock %}
+
+

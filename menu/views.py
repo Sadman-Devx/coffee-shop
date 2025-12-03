@@ -12,6 +12,67 @@ from django.utils import timezone
 from .models import (Coffee, Order, OrderItem, Feedback, NewsletterSubscriber, 
                      ContactMessage, SpecialOffer, Reservation, FAQ, GalleryImage)
 import json
+from decimal import Decimal, ROUND_HALF_UP
+
+DELIVERY_FEES = {
+    'pickup': Decimal('0.00'),
+    'dine_in': Decimal('0.00'),
+    'curbside': Decimal('1.50'),
+    'delivery': Decimal('3.50'),
+}
+
+DELIVERY_OPTION_CARDS = [
+    {
+        'value': 'pickup',
+        'title': 'Bar Pickup',
+        'description': 'Order ahead and collect from the brew bar.',
+        'eta': 'Ready in ~10 min',
+        'icon': '🏠',
+        'fee': DELIVERY_FEES['pickup'],
+    },
+    {
+        'value': 'delivery',
+        'title': 'Courier Delivery',
+        'description': 'Fresh cups delivered to your door.',
+        'eta': 'Arrives in 30-40 min',
+        'icon': '🚲',
+        'fee': DELIVERY_FEES['delivery'],
+    },
+    {
+        'value': 'dine_in',
+        'title': 'Dine-in Service',
+        'description': 'We hold a table while we brew your drinks.',
+        'eta': 'Seat is ready on arrival',
+        'icon': '🪑',
+        'fee': DELIVERY_FEES['dine_in'],
+    },
+    {
+        'value': 'curbside',
+        'title': 'Curbside Pickup',
+        'description': 'Park outside, we run the drinks to you.',
+        'eta': 'Ready in ~12 min',
+        'icon': '🚗',
+        'fee': DELIVERY_FEES['curbside'],
+    },
+]
+
+PAYMENT_METHOD_CARDS = [
+    {
+        'value': 'card',
+        'title': 'Card on file',
+        'description': 'Secure Stripe-powered payment.',
+    },
+    {
+        'value': 'cash',
+        'title': 'Pay in store',
+        'description': 'Settle at pickup counter.',
+    },
+    {
+        'value': 'wallet',
+        'title': 'Mobile wallet',
+        'description': 'Apple Pay / Google Pay ready.',
+    },
+]
 
 
 def get_cart(request):
@@ -28,15 +89,113 @@ def get_cart_count(request):
 
 def get_cart_total(request):
     """Calculate total price of items in cart"""
+    _, total = get_cart_items_with_totals(request)
+    return total
+
+
+def get_cart_items_with_totals(request):
+    """Return cart items with coffee data and subtotal"""
     cart = get_cart(request)
-    total = 0
+    cart_items = []
+    total = Decimal('0.00')
+    
     for coffee_id, item in cart.items():
         try:
             coffee = Coffee.objects.get(id=int(coffee_id), available=True)
-            total += float(coffee.price) * item.get('quantity', 0)
         except Coffee.DoesNotExist:
             continue
-    return total
+        
+        quantity = int(item.get('quantity', 1))
+        subtotal = (coffee.price * quantity).quantize(Decimal('0.01'))
+        total += subtotal
+        cart_items.append({
+            'coffee': coffee,
+            'quantity': quantity,
+            'subtotal': subtotal,
+        })
+    
+    total = total.quantize(Decimal('0.01'))
+    return cart_items, total
+
+
+def get_delivery_fee(option):
+    """Return delivery fee for option"""
+    return DELIVERY_FEES.get(option, Decimal('0.00'))
+
+
+def validate_discount_code(code, subtotal):
+    """Validate discount code and return calculation details"""
+    result = {
+        'is_valid': False,
+        'code': '',
+        'percentage': 0,
+        'amount': Decimal('0.00'),
+        'final_total': subtotal,
+        'message': '',
+    }
+    
+    cleaned_code = (code or '').strip()
+    if not cleaned_code:
+        result['message'] = 'Enter a discount code.'
+        return result
+    
+    try:
+        offer = SpecialOffer.objects.get(code__iexact=cleaned_code)
+    except SpecialOffer.DoesNotExist:
+        result['message'] = 'Discount code not found.'
+        return result
+    
+    if not offer.is_valid():
+        result['message'] = 'This discount code is not active right now.'
+        return result
+    
+    percentage = Decimal(offer.discount_percentage)
+    discount_amount = (subtotal * (percentage / Decimal('100'))).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    final_total = (subtotal - discount_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    if final_total < Decimal('0.00'):
+        final_total = Decimal('0.00')
+    
+    result.update({
+        'is_valid': True,
+        'code': offer.code.upper(),
+        'percentage': int(offer.discount_percentage),
+        'amount': discount_amount,
+        'final_total': final_total,
+        'message': f"Code {offer.code.upper()} applied! -{offer.discount_percentage}%"
+    })
+    return result
+
+
+def get_active_discount(request, subtotal):
+    """Fetch discount stored in session and revalidate"""
+    discount_session = request.session.get('discount')
+    if not discount_session:
+        return {
+            'code': '',
+            'percentage': 0,
+            'amount': Decimal('0.00'),
+            'final_total': subtotal
+        }
+    
+    validation = validate_discount_code(discount_session.get('code', ''), subtotal)
+    if validation['is_valid']:
+        request.session['discount'] = {
+            'code': validation['code'],
+            'percentage': validation['percentage'],
+            'amount': str(validation['amount'])
+        }
+        request.session.modified = True
+        return validation
+    
+    # Remove invalid discount from session
+    request.session.pop('discount', None)
+    request.session.modified = True
+    return {
+        'code': '',
+        'percentage': 0,
+        'amount': Decimal('0.00'),
+        'final_total': subtotal
+    }
 
 
 def home(request):
@@ -158,28 +317,15 @@ def add_to_cart(request, coffee_id):
 
 def view_cart(request):
     """Display shopping cart"""
-    cart = get_cart(request)
-    cart_items = []
-    total = 0
-    
-    for coffee_id, item in cart.items():
-        try:
-            coffee = Coffee.objects.get(id=int(coffee_id), available=True)
-            quantity = item.get('quantity', 1)
-            subtotal = float(coffee.price) * quantity
-            total += subtotal
-            
-            cart_items.append({
-                'coffee': coffee,
-                'quantity': quantity,
-                'subtotal': subtotal,
-            })
-        except Coffee.DoesNotExist:
-            continue
+    cart_items, subtotal = get_cart_items_with_totals(request)
+    discount_info = get_active_discount(request, subtotal)
+    subtotal_after_discount = discount_info.get('final_total', subtotal)
     
     context = {
         'cart_items': cart_items,
-        'total': total,
+        'subtotal': subtotal,
+        'discount_info': discount_info,
+        'cart_total': subtotal_after_discount,
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/cart.html", context)
@@ -246,35 +392,83 @@ def remove_from_cart(request, coffee_id):
 
 def checkout(request):
     """Display checkout page"""
-    cart = get_cart(request)
-    if not cart:
+    cart_items, subtotal = get_cart_items_with_totals(request)
+    if not cart_items:
         messages.warning(request, "Your cart is empty!")
         return redirect('view_cart')
     
-    cart_items = []
-    total = 0
+    discount_info = get_active_discount(request, subtotal)
+    subtotal_after_discount = discount_info.get('final_total', subtotal)
     
-    for coffee_id, item in cart.items():
-        try:
-            coffee = Coffee.objects.get(id=int(coffee_id), available=True)
-            quantity = item.get('quantity', 1)
-            subtotal = float(coffee.price) * quantity
-            total += subtotal
-            
-            cart_items.append({
-                'coffee': coffee,
-                'quantity': quantity,
-                'subtotal': subtotal,
-            })
-        except Coffee.DoesNotExist:
-            continue
+    stored_delivery = request.session.get('last_delivery_option', 'pickup')
+    delivery_fee = get_delivery_fee(stored_delivery)
+    estimated_total = (subtotal_after_discount + delivery_fee).quantize(Decimal('0.01'))
     
     context = {
         'cart_items': cart_items,
-        'total': total,
+        'subtotal': subtotal,
+        'discount_info': discount_info,
+        'subtotal_after_discount': subtotal_after_discount,
+        'delivery_option': stored_delivery,
+        'delivery_fee': delivery_fee,
+        'estimated_total': estimated_total,
+        'delivery_options': DELIVERY_OPTION_CARDS,
+        'payment_methods': PAYMENT_METHOD_CARDS,
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/checkout.html", context)
+
+
+@require_POST
+def apply_discount_code(request):
+    """Validate discount code via AJAX"""
+    cart = get_cart(request)
+    if not cart:
+        return JsonResponse({
+            'success': False,
+            'message': 'Your cart is empty.',
+        }, status=400)
+    
+    _, subtotal = get_cart_items_with_totals(request)
+    discount_code = request.POST.get('discount_code', '').strip()
+    
+    if not discount_code:
+        request.session.pop('discount', None)
+        request.session.modified = True
+        return JsonResponse({
+            'success': True,
+            'message': 'Discount removed.',
+            'discount_amount': "0.00",
+            'final_total': f"{subtotal:.2f}",
+            'code': '',
+        })
+    
+    validation = validate_discount_code(discount_code, subtotal)
+    if not validation['is_valid']:
+        request.session.pop('discount', None)
+        request.session.modified = True
+        return JsonResponse({
+            'success': False,
+            'message': validation['message'] or 'Invalid discount code.',
+            'final_total': f"{subtotal:.2f}",
+            'code': '',
+        }, status=400)
+    
+    request.session['discount'] = {
+        'code': validation['code'],
+        'percentage': validation['percentage'],
+        'amount': str(validation['amount']),
+    }
+    request.session.modified = True
+    
+    return JsonResponse({
+        'success': True,
+        'message': validation['message'],
+        'discount_amount': f"{validation['amount']:.2f}",
+        'final_total': f"{validation['final_total']:.2f}",
+        'code': validation['code'],
+        'percentage': validation['percentage'],
+    })
 
 
 @require_POST
@@ -285,16 +479,42 @@ def place_order(request):
         messages.error(request, "Your cart is empty!")
         return redirect('view_cart')
     
+    cart_items, subtotal = get_cart_items_with_totals(request)
+    
     # Get customer information
     customer_name = request.POST.get('customer_name', '').strip()
     customer_email = request.POST.get('customer_email', '').strip()
     customer_phone = request.POST.get('customer_phone', '').strip()
     notes = request.POST.get('notes', '').strip()
+    delivery_option = request.POST.get('delivery_option', 'pickup')
+    payment_method = request.POST.get('payment_method', 'cash')
+    discount_code_input = request.POST.get('discount_code', '').strip()
     
     # Validate required fields
     if not all([customer_name, customer_email, customer_phone]):
         messages.error(request, "Please fill in all required fields!")
         return redirect('checkout')
+    
+    if delivery_option not in DELIVERY_FEES:
+        delivery_option = 'pickup'
+    if payment_method not in [method['value'] for method in PAYMENT_METHOD_CARDS]:
+        payment_method = 'cash'
+    
+    # Validate discount code (prefer code submitted in form, fallback to session)
+    discount_info = None
+    if discount_code_input:
+        discount_info = validate_discount_code(discount_code_input, subtotal)
+        if not discount_info['is_valid']:
+            messages.error(request, discount_info['message'])
+            return redirect('checkout')
+    else:
+        discount_info = get_active_discount(request, subtotal)
+    
+    discount_code = discount_info.get('code', '')
+    discount_amount = discount_info.get('amount', Decimal('0.00'))
+    subtotal_after_discount = discount_info.get('final_total', subtotal)
+    delivery_fee = get_delivery_fee(delivery_option)
+    final_amount = (subtotal_after_discount + delivery_fee).quantize(Decimal('0.01'))
     
     # Create order
     order = Order.objects.create(
@@ -302,37 +522,44 @@ def place_order(request):
         customer_email=customer_email,
         customer_phone=customer_phone,
         notes=notes,
-        status='pending'
+        status='pending',
+        delivery_option=delivery_option,
+        payment_method=payment_method,
+        payment_status='paid' if payment_method in ['card', 'wallet'] else 'pending',
     )
     
     # Create order items
-    total = 0
-    for coffee_id, item in cart.items():
-        try:
-            coffee = Coffee.objects.get(id=int(coffee_id), available=True)
-            quantity = item.get('quantity', 1)
-            subtotal = float(coffee.price) * quantity
-            total += subtotal
-            
-            OrderItem.objects.create(
-                order=order,
-                coffee=coffee,
-                quantity=quantity,
-                price=coffee.price
-            )
-        except Coffee.DoesNotExist:
-            continue
+    subtotal_accumulator = Decimal('0.00')
+    for item in cart_items:
+        coffee = item['coffee']
+        quantity = item['quantity']
+        subtotal_line = item['subtotal']
+        subtotal_accumulator += subtotal_line
+        
+        OrderItem.objects.create(
+            order=order,
+            coffee=coffee,
+            quantity=quantity,
+            price=coffee.price
+        )
     
     # Update order total and calculate estimated time
-    order.total_amount = total
+    order.total_amount = subtotal_accumulator
+    order.discount_code = discount_code
+    order.discount_amount = discount_amount
+    order.delivery_fee = delivery_fee
+    order.final_amount = final_amount
     order.calculate_estimated_time()
     order.save()
     
-    # Store order ID in session for tracking
+    # Store order ID in session for tracking and remember delivery preference
     request.session['last_order_id'] = order.id
+    request.session['last_delivery_option'] = delivery_option
     
-    # Clear cart
+    # Clear cart and discount
     request.session['cart'] = {}
+    request.session.pop('discount', None)
+    request.session.modified = True
     
     messages.success(request, f"Order #{order.id} placed successfully! We'll contact you soon.")
     return redirect('order_confirmation', order_id=order.id)
@@ -412,6 +639,42 @@ def my_orders(request):
         'cart_count': get_cart_count(request),
     }
     return render(request, "menu/my_orders.html", context)
+
+
+def my_reservations(request):
+    """Allow guests to view confirmed reservations"""
+    email = request.GET.get('email', '').strip()
+    phone = request.GET.get('phone', '').strip()
+    reservations = None
+    
+    if email and phone:
+        reservations = Reservation.objects.filter(
+            customer_email__iexact=email,
+            customer_phone__icontains=phone,
+            status='confirmed'
+        ).order_by('reservation_date')
+    elif email or phone:
+        messages.info(request, "For security we need both email and phone to show confirmed reservations.")
+    
+    upcoming = []
+    past = []
+    if reservations:
+        now = timezone.now()
+        for reservation in reservations:
+            if reservation.reservation_date >= now:
+                upcoming.append(reservation)
+            else:
+                past.append(reservation)
+    
+    context = {
+        'email': email,
+        'phone': phone,
+        'reservations': reservations,
+        'upcoming_reservations': upcoming,
+        'past_reservations': past,
+        'cart_count': get_cart_count(request),
+    }
+    return render(request, "menu/my_reservations.html", context)
 
 
 def send_order_completion_notification(order):

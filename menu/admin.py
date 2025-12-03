@@ -21,17 +21,32 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer_name', 'customer_email', 'status', 'total_amount', 'estimated_ready_time', 'created_at']
-    list_filter = ['status', 'created_at']
-    search_fields = ['customer_name', 'customer_email', 'customer_phone']
-    readonly_fields = ['created_at', 'updated_at', 'total_amount']
+    list_display = [
+        'id',
+        'customer_name',
+        'customer_email',
+        'status',
+        'delivery_option',
+        'payment_method',
+        'final_amount',
+        'created_at'
+    ]
+    list_filter = ['status', 'delivery_option', 'payment_method', 'created_at']
+    search_fields = ['customer_name', 'customer_email', 'customer_phone', 'discount_code']
+    readonly_fields = ['created_at', 'updated_at', 'total_amount', 'final_amount', 'discount_amount', 'delivery_fee']
     inlines = [OrderItemInline]
     fieldsets = (
         ('Customer Information', {
             'fields': ('customer_name', 'customer_email', 'customer_phone')
         }),
+        ('Fulfillment & Payment', {
+            'fields': ('delivery_option', 'payment_method', 'payment_status', 'status')
+        }),
+        ('Financials', {
+            'fields': ('total_amount', 'discount_code', 'discount_amount', 'delivery_fee', 'final_amount')
+        }),
         ('Order Details', {
-            'fields': ('status', 'total_amount', 'estimated_ready_time', 'notes', 'completion_message', 'created_at', 'updated_at')
+            'fields': ('estimated_ready_time', 'notes', 'completion_message', 'created_at', 'updated_at')
         }),
     )
     

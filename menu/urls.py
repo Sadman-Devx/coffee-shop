@@ -8,11 +8,13 @@ urlpatterns = [
     path('cart/update/<int:coffee_id>/', views.update_cart, name='update_cart'),
     path('cart/remove/<int:coffee_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout, name='checkout'),
+    path('checkout/discount/', views.apply_discount_code, name='apply_discount'),
     path('order/place/', views.place_order, name='place_order'),
     path('order/confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
     path('order/track/<int:order_id>/', views.track_order, name='track_order'),
     path('order/<int:order_id>/feedback/', views.submit_feedback, name='submit_feedback'),
     path('my-orders/', views.my_orders, name='my_orders'),
+    path('my-reservations/', views.my_reservations, name='my_reservations'),
     path('feedbacks/', views.view_feedbacks, name='view_feedbacks'),
     # Business pages
     path('about/', views.about_us, name='about_us'),

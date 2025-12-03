@@ -58,12 +58,19 @@
                 <h2>Order Summary</h2>
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span>${{ total|floatformat:2 }}</span>
+                    <span>${{ subtotal|floatformat:2 }}</span>
                 </div>
+                {% if discount_info.amount > 0 %}
+                <div class="summary-row discount-row">
+                    <span>Discount ({{ discount_info.code }})</span>
+                    <span>- ${{ discount_info.amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
                 <div class="summary-row total">
-                    <span>Total:</span>
-                    <span>${{ total|floatformat:2 }}</span>
+                    <span>Total due now:</span>
+                    <span>${{ cart_total|floatformat:2 }}</span>
                 </div>
+                <p class="summary-note">Add discount or delivery preferences at checkout.</p>
                 <a href="{% url 'checkout' %}" class="cta-btn primary checkout-btn">Proceed to Checkout</a>
                 <a href="{% url 'home' %}#menu" class="cta-btn ghost">Continue Shopping</a>
             </div>

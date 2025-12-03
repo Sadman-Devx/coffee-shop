@@ -106,8 +106,30 @@
                 {% endfor %}
             </div>
             <div class="order-total">
-                <span>Total:</span>
-                <strong>${{ order.total_amount|floatformat:2 }}</strong>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>${{ order.total_amount|floatformat:2 }}</span>
+                </div>
+                {% if order.discount_amount > 0 %}
+                <div class="summary-row">
+                    <span>Discount {% if order.discount_code %}({{ order.discount_code }}){% endif %}:</span>
+                    <span>- ${{ order.discount_amount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="summary-row">
+                    <span>Delivery:</span>
+                    <span>
+                        {% if order.delivery_fee > 0 %}
+                            ${{ order.delivery_fee|floatformat:2 }}
+                        {% else %}
+                            Free
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="summary-row total">
+                    <span>Final Total:</span>
+                    <strong>${{ order.final_amount|floatformat:2 }}</strong>
+                </div>
             </div>
         </div>
 
@@ -128,6 +150,14 @@
             <div class="info-row">
                 <span>Order Date:</span>
                 <span>{{ order.created_at|date:"F d, Y g:i A" }}</span>
+            </div>
+            <div class="info-row">
+                <span>Delivery Method:</span>
+                <span>{{ order.get_delivery_option_display }}</span>
+            </div>
+            <div class="info-row">
+                <span>Payment Method:</span>
+                <span>{{ order.get_payment_method_display }} · {{ order.get_payment_status_display }}</span>
             </div>
             {% if order.notes %}
             <div class="info-row">
