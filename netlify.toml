@@ -13,12 +13,10 @@
 ## or assets unless you integrate another Python backend service.
 
 [build]
-  command = "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput"
-  publish = "staticfiles"
-
-  ## If you only want to build static assets without running migrations,
-  ## you can simplify to:
-  ## command = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+  # Pure static deploy: serve files from the "static" directory
+  # No Python / Django build step is run on Netlify.
+  command = "echo 'Static build – no server-side code'"
+  publish = "static"
 
 [build.environment]
   ## Set any Django settings here, and also in the Netlify UI:

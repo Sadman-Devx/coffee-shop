@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brew Bloom Coffee · Crafted Cups</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav-container">
+            <div class="logo">Brew Bloom</div>
+            <nav class="nav-links">
+                <a href="#highlights">Highlights</a>
+                <a href="#menu">Menu</a>
+                <a href="#experiences">Experiences</a>
+                <a href="#visit">Visit</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-modern">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="hero-line">Discover</span>
+                        <span class="hero-line">The Art Of</span>
+                        <span class="hero-line">Perfect Coffee</span>
+                    </h1>
+                    <p class="hero-subhead">
+                        Experience the rich and bold flavors of our coffee blends, crafted to awaken your senses and start your day right.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#menu" class="cta-btn-primary">Explore Menu</a>
+                        <a href="#visit" class="cta-btn-secondary">Visit Our Shop</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="coffee-carousel">
+                        <div class="carousel-container">
+                            <img src="/img/home/hero-1.jpg" alt="Signature coffee hero 1" class="carousel-img active">
+                            <img src="/img/home/hero-2.jpg" alt="Signature coffee hero 2" class="carousel-img">
+                            <img src="/img/home/hero-3.jpg" alt="Signature coffee hero 3" class="carousel-img">
+                            <img src="/img/home/hero-4.jpg" alt="Signature coffee hero 4" class="carousel-img">
+                            <img src="/img/home/hero-5.jpg" alt="Signature coffee hero 5" class="carousel-img">
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="indicator active" data-slide="0"></span>
+                            <span class="indicator" data-slide="1"></span>
+                            <span class="indicator" data-slide="2"></span>
+                            <span class="indicator" data-slide="3"></span>
+                            <span class="indicator" data-slide="4"></span>
+                        </div>
+                    </div>
+                    <div class="hero-branding">BB</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="highlights" class="highlight-grid">
+            <article class="highlight-card animate-on-scroll">
+                <h3>Crafted Daily</h3>
+                <p>Open 8am – 10pm · Seven days a week</p>
+            </article>
+            <article class="highlight-card animate-on-scroll">
+                <h3>Find us</h3>
+                <p>123 Brew Street, Coffee City</p>
+            </article>
+            <article class="highlight-card animate-on-scroll">
+                <h3>Call ahead</h3>
+                <p>+1 (555) 123-4567</p>
+            </article>
+        </section>
+
+        <section id="menu" class="menu-section">
+            <div class="section-heading animate-on-scroll">
+                <p class="kicker">Signature pours</p>
+                <h2>Modern classics &amp; seasonal innovations</h2>
+                <p>Each recipe is dialed in daily to highlight the terroir of the bean and the craft of our baristas.</p>
+            </div>
+            <div class="menu-grid">
+                <article class="menu-card animate-on-scroll">
+                    <div class="menu-card-content">
+                        <p class="menu-origin">Ethiopia</p>
+                        <h3>Brew Bloom House Espresso</h3>
+                        <p class="menu-notes">Bright citrus, cocoa finish, velvety mouthfeel.</p>
+                        <div class="menu-meta">
+                            <span class="menu-strength">Medium</span>
+                            <span class="menu-price">$4.50</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="menu-card animate-on-scroll">
+                    <div class="menu-card-content">
+                        <p class="menu-origin">Colombia</p>
+                        <h3>Caramel Cold Brew</h3>
+                        <p class="menu-notes">Slow-steeped with caramel and vanilla notes.</p>
+                        <div class="menu-meta">
+                            <span class="menu-strength">Strong</span>
+                            <span class="menu-price">$5.00</span>
+                        </div>
+                    </div>
+                </article>
+                <article class="menu-card animate-on-scroll">
+                    <div class="menu-card-content">
+                        <p class="menu-origin">Kenya</p>
+                        <h3>Seasonal Pour Over</h3>
+                        <p class="menu-notes">Rotating microlots with tasting notes on the bar.</p>
+                        <div class="menu-meta">
+                            <span class="menu-strength">Light</span>
+                            <span class="menu-price">$4.75</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="experiences" class="experiences">
+            <div class="section-heading animate-on-scroll">
+                <p class="kicker">Beyond the bar</p>
+                <h2>Experiences &amp; community</h2>
+                <p>Reserve immersive tastings, team coffee rituals, and custom catering for gatherings.</p>
+            </div>
+            <ul class="experience-list">
+                <li class="animate-on-scroll">Weekly cupping sessions</li>
+                <li class="animate-on-scroll">Latte art workshops</li>
+                <li class="animate-on-scroll">Office coffee consulting</li>
+            </ul>
+        </section>
+
+        <section id="visit" class="visit-cta">
+            <div>
+                <p class="kicker">Visit us</p>
+                <h2>Need beans for the office or a full espresso cart?</h2>
+                <p>We curate wholesale partnerships, host off-site popups, and roast custom blends.</p>
+            </div>
+            <a href="mailto:hello@brewbloom.cafe" class="cta-btn primary">Book a tasting</a>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; <span id="year"></span> Brew Bloom Coffee. All rights reserved.</p>
+    </footer>
+
+    <script>
+    // Simple image carousel and scroll animations (client-side only)
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('.carousel-img');
+        const indicators = document.querySelectorAll('.indicator');
+        let currentIndex = 0;
+        const intervalTime = 4000;
+
+        function showSlide(index) {
+            images.forEach(img => img.classList.remove('active'));
+            indicators.forEach(ind => ind.classList.remove('active'));
+            if (images[index]) images[index].classList.add('active');
+            if (indicators[index]) indicators[index].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % images.length;
+            showSlide(currentIndex);
+        }
+
+        if (images.length > 0) {
+            setInterval(nextSlide, intervalTime);
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', function() {
+                    currentIndex = index;
+                    showSlide(currentIndex);
+                });
+            });
+        }
+
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    el.classList.add('is-visible');
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        animatedElements.forEach(el => observer.observe(el));
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+    });
+    </script>
+</body>
+</html>
+
+
