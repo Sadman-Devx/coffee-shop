@@ -50,20 +50,25 @@ A modern, responsive coffee shop website built with Django 5.2.
 
 ## Deployment
 
-This project is configured for Railway deployment.
+This project was originally configured for Railway deployment but is now set up for Netlify static deployment.
 
-### Railway Deployment
+### Netlify (static front-end) Deployment
 
-1. Push code to GitHub
-2. Connect repository to Railway
-3. Railway auto-detects and deploys
-4. Your site will be live at: `https://your-app.up.railway.app`
+> Note: Netlify is ideal for static sites and front-ends. Django is a full backend framework, so only the static assets (CSS, images, etc.) will be hosted on Netlify with this setup. For a fully functional site (checkout, auth, admin, etc.), you still need a Python backend host (e.g. Render, Railway, Fly.io, etc.) and point your front-end to it.
 
-The `start.sh` script automatically:
-- Runs database migrations
-- Sets up admin user and coffee items
-- Collects static files
-- Starts the server
+1. Push code to GitHub (or another Git provider supported by Netlify)
+2. In the Netlify dashboard, create a new site from Git
+3. When asked for build settings, use:
+   - **Build command**: `pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput`
+   - **Publish directory**: `staticfiles`
+4. Configure environment variables in Netlify:
+   - `DJANGO_SECRET_KEY` (a long random string)
+   - `DJANGO_DEBUG` = `False`
+   - `DJANGO_ALLOWED_HOSTS` (e.g. your Netlify domain)
+   - Any other settings your `coffee_site/settings.py` expects
+5. Deploy the site in Netlify
+
+The `start.sh` script is used for traditional server deployments (e.g. Railway/Render) and is not used directly by Netlify.
 
 ## Project Structure
 
@@ -78,9 +83,8 @@ coffee-shop/
 ├── templates/           # HTML templates
 ├── static/              # CSS and static files
 ├── requirements.txt     # Python dependencies
-├── Procfile            # Railway process file
-├── railway.json        # Railway configuration
-└── start.sh            # Startup script
+├── Procfile            # Process file for traditional hosts (optional)
+└── start.sh            # Startup script for traditional hosts
 ```
 
 ## Admin Panel

@@ -1,0 +1,34 @@
+## Netlify configuration for Brew Bloom Coffee Shop (Django)
+##
+## IMPORTANT: Netlify is primarily for static sites and Jamstack apps.
+## This configuration will:
+## - Install dependencies
+## - Run Django migrations
+## - Collect static files
+## - Publish ONLY the collected static files
+##
+## Your dynamic Django views (checkout, auth, admin, etc.) will NOT run
+## on Netlify alone; you will need a separate backend host for full
+## functionality. Netlify here is best used just for static marketing pages
+## or assets unless you integrate another Python backend service.
+
+[build]
+  command = "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput"
+  publish = "staticfiles"
+
+  ## If you only want to build static assets without running migrations,
+  ## you can simplify to:
+  ## command = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+  ## Set any Django settings here, and also in the Netlify UI:
+  ## DJANGO_SECRET_KEY, DJANGO_DEBUG, DJANGO_ALLOWED_HOSTS, etc.
+
+## Example: redirect everything to index (for a SPA front-end). Not needed for Django templates.
+## [[redirects]]
+##   from = "/*"
+##   to = "/index.html"
+##   status = 200
+
+
