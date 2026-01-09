@@ -21,7 +21,7 @@
   ## command = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
 
 [build.environment]
-  PYTHON_VERSION = "3.11"
+  PYTHON_VERSION = "3.11.4"
   ## Set any Django settings here, and also in the Netlify UI:
   ## DJANGO_SECRET_KEY, DJANGO_DEBUG, DJANGO_ALLOWED_HOSTS, etc.
 
