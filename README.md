@@ -50,25 +50,13 @@ A modern, responsive coffee shop website built with Django 5.2.
 
 ## Deployment
 
-This project was originally configured for Railway deployment but is now set up for Netlify static deployment.
+This is a standard Django project. To deploy it publicly you need a server that can run Python (Django + a WSGI server like Gunicorn) and a database.
 
-### Netlify (static front-end) Deployment
-
-> Note: Netlify is ideal for static sites and front-ends. Django is a full backend framework, so only the static assets (CSS, images, etc.) will be hosted on Netlify with this setup. For a fully functional site (checkout, auth, admin, etc.), you still need a Python backend host (e.g. Render, Railway, Fly.io, etc.) and point your front-end to it.
-
-1. Push code to GitHub (or another Git provider supported by Netlify)
-2. In the Netlify dashboard, create a new site from Git
-3. When asked for build settings, use:
-   - **Build command**: `pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput`
-   - **Publish directory**: `staticfiles`
-4. Configure environment variables in Netlify:
-   - `DJANGO_SECRET_KEY` (a long random string)
-   - `DJANGO_DEBUG` = `False`
-   - `DJANGO_ALLOWED_HOSTS` (e.g. your Netlify domain)
-   - Any other settings your `coffee_site/settings.py` expects
-5. Deploy the site in Netlify
-
-The `start.sh` script is used for traditional server deployments (e.g. Railway/Render) and is not used directly by Netlify.
+The included `start.sh` script is intended for traditional server deployments and typically:
+- Runs database migrations
+- Sets up initial data (if applicable)
+- Collects static files
+- Starts the server
 
 ## Project Structure
 
