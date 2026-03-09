@@ -10,28 +10,50 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env (local dev convenience)
+load_dotenv(BASE_DIR / ".env")
+
+
+def _env_bool(key: str, default: bool = False) -> bool:
+    raw = os.getenv(key)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _env_list(key: str, default: list[str] | None = None) -> list[str]:
+    raw = os.getenv(key)
+    if raw is None:
+        return default or []
+    return [item.strip() for item in raw.split(",") if item.strip()]
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c$%_sx*7%ta@wxc-3zegx4b)g@hwu_&^rbv-7bn1@q&66rw!4i'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-only")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _env_bool("DJANGO_DEBUG", True)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", ["127.0.0.1", "localhost"])
 
-# CSRF Trusted Origins for Railway deployment
-CSRF_TRUSTED_ORIGINS = [
-    "https://web-production-51a81.up.railway.app",
-    "https://*.up.railway.app",
-]
+CSRF_TRUSTED_ORIGINS = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
+
+if not DEBUG:
+    if SECRET_KEY == "django-insecure-dev-only":
+        raise RuntimeError("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG=False")
+    if "*" in ALLOWED_HOSTS:
+        raise RuntimeError("DJANGO_ALLOWED_HOSTS cannot contain '*' when DJANGO_DEBUG=False")
 
 
 # Application definition
@@ -43,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'menu',
 ]
 
@@ -145,3 +168,24 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 # EMAIL_HOST_USER = 'your-email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your-password'
 DEFAULT_FROM_EMAIL = 'Brew Bloom Coffee <noreply@brewbloom.cafe>'
+
+# Django REST Framework configuration
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    # Basic traffic handling: paginate and rate-limit API calls
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/hour",
+        "user": "1000/hour",
+    },
+}

@@ -27,6 +27,10 @@ A modern, responsive coffee shop website built with Django 5.2.
    pip install -r requirements.txt
    ```
 
+2. **Set environment variables (recommended):**
+   - Copy `env.example` to `.env` in the project root (same folder as `manage.py`)
+   - Update at least `DJANGO_SECRET_KEY`
+
 2. **Run migrations:**
    ```bash
    python manage.py migrate
