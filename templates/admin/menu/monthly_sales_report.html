@@ -1,0 +1,74 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+
+  <form method="get" style="margin: 12px 0;">
+    <label for="id_year">Year</label>
+    <input id="id_year" name="year" type="number" value="{{ year }}" min="2000" max="2100" style="width: 110px;" />
+    <label for="id_month" style="margin-left: 10px;">Month</label>
+    <input id="id_month" name="month" type="number" value="{{ month }}" min="1" max="12" style="width: 80px;" />
+    <button type="submit" class="button default" style="margin-left: 10px;">View</button>
+  </form>
+
+  <div style="margin: 12px 0;">
+    <strong>Period:</strong> {{ start|date:"Y-m-d" }} → {{ end|date:"Y-m-d" }}
+  </div>
+
+  <div style="margin: 16px 0;">
+    <h2>Totals</h2>
+    <ul>
+      <li><strong>Items sold:</strong> {{ totals.items_sold }}</li>
+      <li><strong>Revenue:</strong> {{ totals.revenue }}</li>
+      <li><strong>Orders:</strong> {{ orders|length }}</li>
+    </ul>
+  </div>
+
+  <div style="margin: 16px 0;">
+    <h2>By coffee</h2>
+    <table class="adminlist">
+      <thead>
+        <tr>
+          <th>Coffee</th>
+          <th style="text-align:right;">Quantity</th>
+          <th style="text-align:right;">Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in per_coffee %}
+          <tr>
+            <td>{{ row.coffee__name }}</td>
+            <td style="text-align:right;">{{ row.qty }}</td>
+            <td style="text-align:right;">{{ row.revenue }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No sales in this period.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin: 16px 0;">
+    <h2>Orders (details)</h2>
+    {% for order in orders %}
+      <div style="padding: 10px 0; border-top: 1px solid #e5e5e5;">
+        <div>
+          <strong>Order #{{ order.id }}</strong>
+          — {{ order.created_at|date:"Y-m-d H:i" }}
+          — {{ order.customer_name }}
+          — status: {{ order.get_status_display }}
+          — final: {{ order.final_amount }}
+        </div>
+        <ul style="margin: 6px 0 0 18px;">
+          {% for item in order.items.all %}
+            <li>{{ item.quantity }} × {{ item.coffee.name }} @ {{ item.price }} = {{ item.subtotal }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% empty %}
+      <p>No orders in this period.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+

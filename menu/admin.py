@@ -1,4 +1,10 @@
+from datetime import datetime
+
 from django.contrib import admin
+from django.db.models import DecimalField, ExpressionWrapper, F, Sum, Value
+from django.db.models.functions import Coalesce
+from django.template.response import TemplateResponse
+from django.urls import path
 from django.utils import timezone
 from .models import (Coffee, Order, OrderItem, Feedback, NewsletterSubscriber, 
                      ContactMessage, SpecialOffer, Reservation, FAQ, GalleryImage)
@@ -49,6 +55,77 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('estimated_ready_time', 'notes', 'completion_message', 'created_at', 'updated_at')
         }),
     )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "monthly-sales/",
+                self.admin_site.admin_view(self.monthly_sales_view),
+                name="menu_order_monthly_sales",
+            ),
+        ]
+        return custom_urls + urls
+
+    def monthly_sales_view(self, request):
+        today = timezone.localdate()
+        year = int(request.GET.get("year", today.year))
+        month = int(request.GET.get("month", today.month))
+
+        start = timezone.make_aware(datetime(year, month, 1))
+        if month == 12:
+            end = timezone.make_aware(datetime(year + 1, 1, 1))
+        else:
+            end = timezone.make_aware(datetime(year, month + 1, 1))
+
+        orders_qs = (
+            Order.objects.filter(created_at__gte=start, created_at__lt=end)
+            .exclude(status="cancelled")
+            .prefetch_related("items__coffee")
+            .order_by("-created_at")
+        )
+
+        items_qs = OrderItem.objects.filter(order__in=orders_qs).select_related("coffee")
+
+        line_total = ExpressionWrapper(
+            F("quantity") * F("price"),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        )
+        zero_money = Value(0, output_field=DecimalField(max_digits=12, decimal_places=2))
+
+        totals = items_qs.aggregate(
+            items_sold=Coalesce(Sum("quantity"), 0),
+            revenue=Coalesce(
+                Sum(line_total),
+                zero_money,
+            ),
+        )
+
+        per_coffee = (
+            items_qs.values("coffee__id", "coffee__name")
+            .annotate(
+                qty=Coalesce(Sum("quantity"), 0),
+                revenue=Coalesce(
+                    Sum(line_total),
+                    zero_money,
+                ),
+            )
+            .order_by("-qty", "coffee__name")
+        )
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": "Monthly sales report",
+            "year": year,
+            "month": month,
+            "start": start,
+            "end": end,
+            "orders": orders_qs,
+            "per_coffee": per_coffee,
+            "totals": totals,
+        }
+        return TemplateResponse(request, "admin/menu/monthly_sales_report.html", context)
     
     def save_model(self, request, obj, form, change):
         """Override save to send notification when order is completed"""
